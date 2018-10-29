@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace ClientLibrary
 {
-    class ClientLibrary
+    public interface IClientService
     {
+        void add();
+
+        void read();
+
+        void take();
     }
 }
