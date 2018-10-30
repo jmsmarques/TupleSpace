@@ -9,8 +9,21 @@ namespace Server
 {
     class ServerService : MarshalByRefObject, IServerService
     {
+        private int a;
+
+        public int A
+        {
+            get { return a; }
+        }
+
+        public ServerService()
+        {
+            a = 1;
+        }
+
         public void add()
         {
+            a++;
             Console.WriteLine("Works\n");
         }
 

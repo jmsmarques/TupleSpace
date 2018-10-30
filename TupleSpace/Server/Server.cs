@@ -23,12 +23,14 @@ namespace Server
             TcpChannel channel = new TcpChannel(8086);
             ChannelServices.RegisterChannel(channel, true);
 
-            RemotingConfiguration.RegisterWellKnownServiceType(
-                typeof(ServerService),
-                "MyRemoteObject",
-                WellKnownObjectMode.Singleton);
+            ServerService mo = new ServerService();
+            RemotingServices.Marshal(mo,"MyRemoteObject",
+            typeof(ServerService));
 
             System.Console.WriteLine("<enter> para sair...");
+            System.Console.ReadLine();
+
+            System.Console.WriteLine("{0}", mo.A);
             System.Console.ReadLine();
         }
     }
