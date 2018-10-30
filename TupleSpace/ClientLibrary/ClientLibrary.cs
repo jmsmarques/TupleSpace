@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ClientLibrary
 {
-    public interface IClientService
+    public interface IServerService
     {
         void add();
 
