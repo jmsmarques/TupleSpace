@@ -13,6 +13,9 @@ namespace PuppetMaster
     {
         static void Main(string[] args)
         {
+
+        	//Teste
+        	
             Console.Write(".");
             System.Threading.Thread.Sleep(1000);
             Console.Write(".");
