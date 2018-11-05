@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using ClientLibrary;
 
@@ -25,25 +26,30 @@ namespace Server
         }
 
         //client functions
-        public void add()
+        public void Add()
         {
             a++;
             Console.WriteLine("Works\n");
         }
 
-        public void read()
+        public void Read()
         {
 
         }
 
-        public void take()
+        public void Take()
         {
 
         }
 
-        public List<IServerService> getView()
+        public List<IServerService> GetView()
         {
             return view;     
+        }
+
+        public void Wait(int x)
+        {
+        
         }
         //end of client functions
     }

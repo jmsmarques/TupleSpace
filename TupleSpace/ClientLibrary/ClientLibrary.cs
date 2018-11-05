@@ -8,12 +8,14 @@ namespace ClientLibrary
 {
     public interface IServerService
     {
-        void add();
+        void Add();
 
-        void read();
+        void Read();
 
-        void take();
+        void Take();
 
-        List<IServerService> getView();
+        List<IServerService> GetView();
+
+        void Wait(int x);
     }
 }

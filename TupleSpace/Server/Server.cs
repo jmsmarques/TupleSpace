@@ -29,9 +29,6 @@ namespace Server
 
             System.Console.WriteLine("<enter> para sair...");
             System.Console.ReadLine();
-
-            System.Console.WriteLine("{0}", mo.A);
-            System.Console.ReadLine();
         }
     }
 }

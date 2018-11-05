@@ -16,23 +16,23 @@ namespace Client
             this.view = view;
         }
 
-        public void add()
+        public void Add()
         {
-            if(compareView())
+            if(CompareView())
             {
-                view = view[0].getView();
+                view = view[0].GetView();
             }
             foreach(IServerService server in view)
             {
-                server.add();
+                server.Add();
             }
         }
 
-        public void take()
+        public void Take()
         {
-            if (compareView())
+            if (CompareView())
             {
-                view = view[0].getView();
+                view = view[0].GetView();
             }
             foreach (IServerService server in view)
             {
@@ -40,11 +40,11 @@ namespace Client
             }
         }
 
-        public void read()
+        public void Read()
         {
-            if (compareView())
+            if (CompareView())
             {
-                view = view[0].getView();
+                view = view[0].GetView();
             }
             foreach (IServerService server in view)
             {
@@ -52,10 +52,15 @@ namespace Client
             }
         }
 
-        private bool compareView()
+        public void Wait()
+        {
+
+        }
+
+        private bool CompareView()
         {
             List<IServerService> aux;
-            aux = view[0].getView();
+            aux = view[0].GetView();
             if (aux.Count == view.Count)
             {
                 for (int i = 0; i < aux.Count; i++)
