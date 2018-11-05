@@ -13,7 +13,7 @@ namespace Client
     class Client
     {
         static void Main(string[] args)
-        {            
+        {          
             TcpChannel channel = new TcpChannel();                
             ChannelServices.RegisterChannel(channel, true);
 
@@ -21,7 +21,15 @@ namespace Client
                     typeof(IServerService),
                     "tcp://localhost:8086/MyRemoteObject");
 
-            obj.add();
+            ClientObj client = new ClientObj(obj.getView());
+
+            Console.WriteLine("Client\nPress <enter> to exit...\n");
+            while(true)
+            {
+                client.add();
+                Console.ReadLine();
+            }
+            Console.ReadLine();
         }
     }
 }

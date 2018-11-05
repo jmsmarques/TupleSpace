@@ -13,5 +13,7 @@ namespace ClientLibrary
         void read();
 
         void take();
+
+        List<IServerService> getView();
     }
 }

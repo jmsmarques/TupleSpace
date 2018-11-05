@@ -10,6 +10,7 @@ namespace Server
     class ServerService : MarshalByRefObject, IServerService
     {
         private int a;
+        private List<IServerService> view;
 
         public int A
         {
@@ -19,8 +20,11 @@ namespace Server
         public ServerService()
         {
             a = 1;
+            view = new List<IServerService>();
+            view.Add(this);
         }
 
+        //client functions
         public void add()
         {
             a++;
@@ -36,5 +40,11 @@ namespace Server
         {
 
         }
+
+        public List<IServerService> getView()
+        {
+            return view;     
+        }
+        //end of client functions
     }
 }
