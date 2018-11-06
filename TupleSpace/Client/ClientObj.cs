@@ -20,7 +20,7 @@ namespace Client
 
         public void Add(String tuple)
         {            
-            Thread.Sleep(wait * 1000);
+            Thread.Sleep(wait);
             wait = 0;
 
             List<string> addTuple;
@@ -53,8 +53,10 @@ namespace Client
             }
             foreach (IServerService server in view)
             {
-
+                takeTuple = server.Take(takeTuple);
             }
+
+            PrintTuple(takeTuple);
         }
 
         public void Read(String tuple)
@@ -75,19 +77,7 @@ namespace Client
                 readTuple = server.Read(readTuple);
             }
 
-            if (readTuple != null)
-            {
-                Console.Write("<");
-                foreach (string s in readTuple)
-                {
-                    Console.Write("{0}", s);
-                    if(!s.Equals(readTuple.Last()))
-                    {
-                        Console.Write(",");
-                    }
-                }
-                Console.Write(">");
-            }
+            PrintTuple(readTuple);
         }
 
         public int Wait
@@ -127,6 +117,23 @@ namespace Client
                 return true;
             }
             return false;
+        }
+
+        private void PrintTuple(List<string> readTuple)
+        {
+            if (readTuple != null)
+            {
+                Console.Write("<");
+                foreach (string s in readTuple)
+                {
+                    Console.Write("{0}", s);
+                    if (!s.Equals(readTuple.Last()))
+                    {
+                        Console.Write(",");
+                    }
+                }
+                Console.WriteLine(">");
+            }
         }
     }
 }

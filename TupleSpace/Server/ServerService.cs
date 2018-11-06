@@ -36,14 +36,29 @@ namespace Server
                 {
                     for (int i = 0; i < tuple.Count; i++)
                     {
-                        if (tuple[i].Equals("*") || tuple[i].Equals(tup[i]))
+                        if(tup[i][0] == '\"') //string
                         {
-                            aux++;
+                            if (CmpString(tup[i], tuple[i]))
+                            {
+                                aux++;
+                            }
+                            else
+                            {
+                                break;
+                            }
                         }
-                        else
+                        else //object
                         {
-                            break;
+                            if (tuple[i].Equals("null") || tuple[i].Equals(tup[i]))
+                            {
+                                aux++;
+                            }
+                            else
+                            {
+                                break;
+                            }
                         }
+                        
                     }
                     if (aux == tuple.Count) {return tup; } 
                 }
@@ -52,8 +67,10 @@ namespace Server
         }
 
         public List<string> Take(List<string> tuple)
-        {
-            return null;
+        {            
+            List<string> returnValue = Read(tuple);
+            tuples.Remove(returnValue);
+            return returnValue;
         }
 
         public List<IServerService> GetView()
@@ -66,5 +83,36 @@ namespace Server
         
         }
         //end of client functions
+
+        private bool CmpString(string original, string toCompare) 
+        {
+            original = original.Trim('\"');
+            toCompare = toCompare.Trim('\"');
+            Console.WriteLine(toCompare);
+            Console.WriteLine(original);
+            Console.WriteLine(toCompare.Equals("\"*\""));
+            if (toCompare.Equals("*") || toCompare.Equals(original))
+            {
+                return true;
+            }
+            else if (toCompare.StartsWith("*")) //checking if original ends with toCompare
+            {
+                if(toCompare.Substring(1, toCompare.Length - 1).Equals(
+                    original.Substring(original.Length - (toCompare.Length - 1), original.Length - 1)) )
+                {
+                    return true;
+                }
+            }
+            else if(toCompare.EndsWith("*")) //checking if original starts with toCompare
+            {
+                if(toCompare.Substring(0, toCompare.Length - 2).Equals(
+                    original.Substring(0, original.Length - (toCompare.Length - 1))))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
