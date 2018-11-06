@@ -31,6 +31,7 @@ namespace Client
 
         private static void Exec(ClientObj client)
         {
+            int loop = 1;
             string input;
             bool go = true;
             while (go)
@@ -40,22 +41,31 @@ namespace Client
                 switch (words[0])
                 {
                     case "add":
-                        client.Add();
+                        for(int i = 0; i < loop; i++)
+                        {
+                            client.Add(words[1]);
+                        }                        
                         break;
                     case "read":
-                        client.Read();
+                        for (int i = 0; i < loop; i++)
+                        {
+                            client.Read(words[1]);
+                        }
                         break;
                     case "take":
-                        client.Take();
+                        for (int i = 0; i < loop; i++)
+                        {
+                            client.Take(words[1]);
+                        }
                         break;
                     case "wait":
-                        client.Wait();
+                        client.Wait = System.Convert.ToInt32(words[1]);
                         break;
                     case "begin-repeat":
-                        Console.WriteLine("begin-repeat " + words[1] + " times ");
+                        loop = System.Convert.ToInt32(words[1]);
                         break;
                     case "end-repeat":
-                        Console.WriteLine("end-repeat");
+                        loop = 1;
                         break;
                     case "exit":
                     case "Exit":

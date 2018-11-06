@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using ClientLibrary;
 
@@ -9,6 +10,7 @@ namespace Client
 {
     class ClientObj
     {
+        private int wait;
         private List<IServerService> view;
 
         public ClientObj(List<IServerService> view)
@@ -16,9 +18,14 @@ namespace Client
             this.view = view;
         }
 
-        public void Add()
-        {
-            if(CompareView())
+        public void Add(String tuple)
+        {            
+            Thread.Sleep(wait * 1000);
+            wait = 0;
+
+            TransformToTuple(tuple);
+
+            if (CompareView())
             {
                 view = view[0].GetView();
             }
@@ -28,8 +35,13 @@ namespace Client
             }
         }
 
-        public void Take()
+        public void Take(String tuple)
         {
+            Thread.Sleep(wait * 1000);
+            wait = 0;
+
+            TransformToTuple(tuple);
+
             if (CompareView())
             {
                 view = view[0].GetView();
@@ -40,8 +52,13 @@ namespace Client
             }
         }
 
-        public void Read()
+        public void Read(String tuple)
         {
+            Thread.Sleep(wait * 1000);
+            wait = 0;
+
+            TransformToTuple(tuple);
+
             if (CompareView())
             {
                 view = view[0].GetView();
@@ -52,9 +69,14 @@ namespace Client
             }
         }
 
-        public void Wait()
-        {
+        public int Wait
+        { set { this.wait = value; } }
 
+        private void TransformToTuple(String tuple)
+        {
+            tuple = tuple.Trim('<');
+            tuple = tuple.Trim('>');
+            string[] words = tuple.Split(',');      
         }
 
         private bool CompareView()
