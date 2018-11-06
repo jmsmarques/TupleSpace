@@ -23,15 +23,18 @@ namespace Client
             Thread.Sleep(wait * 1000);
             wait = 0;
 
-            TransformToTuple(tuple);
+            List<string> addTuple;
+
+            addTuple = TransformToTuple(tuple);
 
             if (CompareView())
             {
                 view = view[0].GetView();
             }
+
             foreach(IServerService server in view)
             {
-                server.Add();
+                server.Add(addTuple);
             }
         }
 
@@ -40,7 +43,9 @@ namespace Client
             Thread.Sleep(wait * 1000);
             wait = 0;
 
-            TransformToTuple(tuple);
+            List<string> takeTuple;
+
+            takeTuple = TransformToTuple(tuple);
 
             if (CompareView())
             {
@@ -57,7 +62,9 @@ namespace Client
             Thread.Sleep(wait * 1000);
             wait = 0;
 
-            TransformToTuple(tuple);
+            List<string> readTuple;
+
+            readTuple = TransformToTuple(tuple);
 
             if (CompareView())
             {
@@ -65,18 +72,40 @@ namespace Client
             }
             foreach (IServerService server in view)
             {
+                readTuple = server.Read(readTuple);
+            }
 
+            if (readTuple != null)
+            {
+                Console.Write("<");
+                foreach (string s in readTuple)
+                {
+                    Console.Write("{0}", s);
+                    if(!s.Equals(readTuple.Last()))
+                    {
+                        Console.Write(",");
+                    }
+                }
+                Console.Write(">");
             }
         }
 
         public int Wait
         { set { this.wait = value; } }
 
-        private void TransformToTuple(String tuple)
+        private List<string> TransformToTuple(String tuple)
         {
+            List<string> returnValue = new List<string>();
             tuple = tuple.Trim('<');
             tuple = tuple.Trim('>');
-            string[] words = tuple.Split(',');      
+            string[] words = tuple.Split(',');
+
+            for(int i = 0; i < words.Length; i++)
+            {
+                returnValue.Add(words[i]);
+            }
+
+            return returnValue;
         }
 
         private bool CompareView()

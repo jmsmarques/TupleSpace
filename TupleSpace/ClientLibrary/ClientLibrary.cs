@@ -8,11 +8,11 @@ namespace ClientLibrary
 {
     public interface IServerService
     {
-        void Add();
+        void Add(List<string> tuple);
 
-        void Read();
+        List<string> Read(List<string> tuple);
 
-        void Take();
+        List<string> Take(List<string> tuple);
 
         List<IServerService> GetView();
 
