@@ -88,8 +88,6 @@ namespace Server
         {
             original = original.Trim('\"');
             toCompare = toCompare.Trim('\"');
-            Console.WriteLine(toCompare);
-            Console.WriteLine(original);
             
             if (toCompare.Equals("*") || toCompare.Equals(original))
             {
@@ -97,18 +95,16 @@ namespace Server
             }
             else if (toCompare.StartsWith("*")) //checking if original ends with toCompare
             {
-                Console.WriteLine(toCompare.Length);
-                Console.WriteLine(original.Length);
-                if (toCompare.Substring(1, (toCompare.Length - 1) - 1).Equals(
-                    original.Substring(original.Length - (toCompare.Length - 1), (original.Length - 1) - (original.Length - (toCompare.Length - 1)))) )
+                if (toCompare.Substring(1, toCompare.Length - 1).Equals(
+                    original.Substring(original.Length - (toCompare.Length - 1), toCompare.Length - 1)))
                 {
                     return true;
                 }
             }
             else if(toCompare.EndsWith("*")) //checking if original starts with toCompare
             {
-                if(toCompare.Substring(0, toCompare.Length - 2).Equals(
-                    original.Substring(0, original.Length - (toCompare.Length - 1))))
+                if (toCompare.Substring(0, toCompare.Length - 1).Equals(
+                    original.Substring(0, toCompare.Length - 1)))
                 {
                     return true;
                 }
