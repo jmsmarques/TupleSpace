@@ -8,19 +8,24 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using ClientLibrary;
 using System.Threading;
+using System.IO;
 
 namespace Client
 {
     class Client
     {
         static void Main(string[] args)
-        {          
+        {
+            string serverLoc = "tcp://" + ReadConfFile() + "/MyRemoteObject";
+
+            Console.WriteLine(serverLoc);
+
             TcpChannel channel = new TcpChannel();                
             ChannelServices.RegisterChannel(channel, true);
 
             IServerService obj = (IServerService)Activator.GetObject(
                     typeof(IServerService),
-                    "tcp://localhost:8086/MyRemoteObject");
+                    serverLoc);
 
             ClientObj client = new ClientObj(obj.GetView());
 
@@ -37,6 +42,7 @@ namespace Client
             string line;
             while (go)
             {                
+
                 input = Console.ReadLine();
                 System.IO.StreamReader file = new System.IO.StreamReader(input);
                 while ((line = file.ReadLine()) != null)
@@ -83,6 +89,31 @@ namespace Client
                 }
                 
             }
+        }
+
+        private static string ReadConfFile()
+        {
+            string result = null;
+            string[] aux = new string[2];
+            using (StreamReader file = File.OpenText("../../../clientConf.txt"))
+            {
+                string line;
+                string[] words;
+                while ((line = file.ReadLine()) != null)
+                {
+                    words = line.Split(':');
+                    if (words[0].Equals("Server"))
+                    {
+                        aux[0] = words[1];
+                    } 
+                    else if(words[0].Equals("Port"))
+                    {
+                        aux[1] = words[1];
+                    }
+                }
+            }
+            result = aux[0] + ":" + aux[1];
+            return result;
         }
     }
 }

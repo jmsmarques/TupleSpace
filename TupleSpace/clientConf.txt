@@ -1,0 +1,2 @@
+Server:localhost
+Port:8086
