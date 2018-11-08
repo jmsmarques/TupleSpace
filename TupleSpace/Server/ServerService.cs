@@ -12,12 +12,14 @@ namespace Server
     {
         private List<IServerService> view;
         private List<List<string>> tuples;  
+        private readonly int comType; //1 for SMR 2 for XL
 
-        public ServerService()
+        public ServerService(int comType)
         {
             view = new List<IServerService>();
             view.Add(this);
             tuples = new List<List<string>>();
+            this.comType = comType;
         }
 
         //client functions
