@@ -67,7 +67,7 @@ namespace Client
         {
             int aux = wait;
             wait = 0;
-            await Task.Delay(5000);
+            await Task.Delay(aux);
 
             List<string> readTuple;
 
