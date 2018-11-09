@@ -16,21 +16,31 @@ namespace Server
     {
         static void Main(string[] args)
         {
-            int[] conf;
+            string[] conf;
+            string serverLoc = null;
 
             conf = ReadConfFile(); //pos 0 is port -- pos 1 is type
-
+            if (!conf[2].Equals("null"))
+            {
+                serverLoc = "tcp://" + conf[2] + ":" + conf[3] + "/MyRemoteObject";
+            }
             Console.WriteLine("Port:{0}\nType:{1}", conf[0], conf[1]);
 
             BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
             provider.TypeFilterLevel = TypeFilterLevel.Full;
             IDictionary props = new Hashtable();
-            props["port"] = conf[0];
-            TcpChannel channel = new TcpChannel(props, null, provider);  
-            
+            props["port"] = System.Convert.ToInt32(conf[0]);
+            TcpChannel channel = new TcpChannel(props, null, provider);
+                        
             ChannelServices.RegisterChannel(channel, true);
 
-            ServerService mo = new ServerService(conf[1]);
+            ServerService mo = new ServerService(System.Convert.ToInt32(conf[1]));
+
+            if(serverLoc != null)
+            {
+                mo.Init(serverLoc);
+            }
+
             RemotingServices.Marshal(mo,"MyRemoteObject",
             typeof(ServerService));
 
@@ -38,9 +48,9 @@ namespace Server
             System.Console.ReadLine();
         }
 
-        static int[] ReadConfFile()
+        static string[] ReadConfFile()
         {           
-            int [] result = new int [2];
+            string [] result = new string [4];
             using (StreamReader file = File.OpenText("../../../serverConf.txt"))
             {
                 string line;
@@ -50,22 +60,30 @@ namespace Server
                     words = line.Split(':');
                     if(words[0].Equals("Port"))
                     {
-                        result[0] = System.Convert.ToInt32(words[1]);
+                        result[0] = words[1];
                     }
                     else if(words[0].Equals("Type"))
                     {
                         if(words[1].Equals("SMR"))
                         {
-                            result[1] = 1;
+                            result[1] = "1";
                         }
                         else if (words[1].Equals("XL"))
                         {
-                            result[1] = 2;
+                            result[1] = "2";
                         }
                         else
                         {
                             //error
                         }
+                    }
+                    else if (words[0].Equals("ViewServer"))
+                    {
+                        result[2] = words[1];
+                    }
+                    else if (words[0].Equals("ViewPort"))
+                    {
+                        result[3] = words[1];
                     }
                 }
             }

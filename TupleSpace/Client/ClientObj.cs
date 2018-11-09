@@ -66,7 +66,7 @@ namespace Client
         public async Task Read(String tuple)
         {
             int aux = wait;
-            wait = 0;
+            wait = 0;            
             await Task.Delay(aux);
 
             List<string> readTuple;

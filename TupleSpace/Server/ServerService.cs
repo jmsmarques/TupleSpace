@@ -15,17 +15,35 @@ namespace Server
         private readonly int comType; //1 for SMR 2 for XL
 
         public ServerService(int comType)
-        {
-            view = new List<IServerService>();
+        {            
+            view = new List<IServerService>();            
             view.Add(this);
             tuples = new List<List<string>>();
             this.comType = comType;
         }
 
+        //server functions
+        public void Init(string serverLoc)
+        {
+            ServerService obj = (ServerService)Activator.GetObject(
+                    typeof(ServerService),
+                    serverLoc);
+
+            view = obj.GetServerView(this);
+        }
+
+        public List<IServerService> GetServerView(ServerService newServer)
+        {
+            view.Add(newServer);
+            return view;
+        }
+        //end of server functions
+
         //client functions
         public void Add(List<string> tuple)
         {
             tuples.Add(tuple);
+            Console.WriteLine("funciona");
         }
 
         public List<string> Read(List<string> tuple)

@@ -75,7 +75,7 @@ namespace Client
                             go = false;
                             break;
                         default:
-                            ReadCommandAsync(client, words[0], words[1]);
+                            ReadCommand(client, words[0], words[1]);
                             break;
                     }                    
                 }
@@ -83,7 +83,7 @@ namespace Client
             }
         }
 
-        private static async void ReadCommandAsync(ClientObj client, string command, string parameters)
+        private static void ReadCommand(ClientObj client, string command, string parameters)
         {
             switch (command)
             {
@@ -91,7 +91,7 @@ namespace Client
                     client.Add(parameters);
                     break;
                 case "read":
-                    await client.Read(parameters);
+                    client.Read(parameters);
                     break;
                 case "take":
                     client.Take(parameters);
@@ -130,7 +130,7 @@ namespace Client
             for(int i = 0; i < loop; i++)
             {
                 for(int n = 0; n < commands.Count; n++)
-                    ReadCommandAsync(client,commands[n][0], commands[n][1]);
+                    ReadCommand(client,commands[n][0], commands[n][1]);
             }
         }
 

@@ -1,2 +1,4 @@
 Port:8086
 Type:SMR
+ViewServer:null
+ViewPort:8086
