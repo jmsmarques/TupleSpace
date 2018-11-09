@@ -63,7 +63,7 @@ namespace Client
                 System.IO.StreamReader file = new System.IO.StreamReader(input);
                 while ((line = file.ReadLine()) != null)
                 {
-                    System.Console.WriteLine(line);
+                    //System.Console.WriteLine(line);
                     string[] words = line.Split(' ');
                     switch (words[0])
                     {
@@ -109,6 +109,8 @@ namespace Client
         {
             string line;
             bool end = false;
+            List<string[]> commands = new List<string[]>();
+
             while ((line = file.ReadLine()) != null && !end)
             {
                 //System.Console.WriteLine(line);
@@ -119,9 +121,16 @@ namespace Client
                         end = true;
                         break;
                     default:
-                        ReadCommand(client, words[0], words[1]);
+                        commands.Add(words);
+                        //ReadCommand(client, words[0], words[1]);
                         break;
                 }
+            }
+
+            for(int i = 0; i < loop; i++)
+            {
+                for(int n = 0; n < commands.Count; n++)
+                    ReadCommand(client,commands[n][0], commands[n][1]);
             }
         }
 
