@@ -16,7 +16,24 @@ namespace Client
     {
         static void Main(string[] args)
         {
-            string serverLoc = "tcp://" + ReadConfFile() + "/MyRemoteObject";
+            string[] aux = ReadConfFile();
+            int comType;
+
+            string serverLoc = "tcp://" + aux[0] + ":" + aux[1] + "/MyRemoteObject";
+
+            if(aux[2].Equals("SMR"))
+            {
+                comType = 1;
+            }
+            else if (aux[2].Equals("XL"))
+            {
+                comType = 2;
+            }
+            else
+            {
+                //error
+                comType = 0;
+            }
 
             Console.WriteLine(serverLoc);
 
@@ -27,7 +44,7 @@ namespace Client
                     typeof(IServerService),
                     serverLoc);
 
-            ClientObj client = new ClientObj(obj.GetView());
+            ClientObj client = new ClientObj(obj.GetView(), comType);
 
             Console.WriteLine("Client\n");
 
@@ -91,10 +108,9 @@ namespace Client
             }
         }
 
-        private static string ReadConfFile()
+        private static string [] ReadConfFile()
         {
-            string result = null;
-            string[] aux = new string[2];
+            string[] aux = new string[3];
             using (StreamReader file = File.OpenText("../../../clientConf.txt"))
             {
                 string line;
@@ -110,10 +126,24 @@ namespace Client
                     {
                         aux[1] = words[1];
                     }
+                    else if (words[0].Equals("Type"))
+                    {
+                        if (words[1].Equals("SMR"))
+                        {
+                            aux[2] = "SMR";
+                        }
+                        else if (words[1].Equals("XL"))
+                        {
+                            aux[2] = "XL";
+                        }
+                        else
+                        {
+                            //error
+                        }
+                    }
                 }
             }
-            result = aux[0] + ":" + aux[1];
-            return result;
+            return aux;
         }
     }
 }

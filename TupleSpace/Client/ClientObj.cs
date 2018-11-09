@@ -12,10 +12,12 @@ namespace Client
     {
         private int wait;
         private List<IServerService> view;
+        private readonly int comType; //1 for SMR 2 for XL
 
-        public ClientObj(List<IServerService> view)
+        public ClientObj(List<IServerService> view, int type)
         {
             this.view = view;
+            comType = type;
         }
 
         public void Add(String tuple)
@@ -40,7 +42,7 @@ namespace Client
 
         public void Take(String tuple)
         {
-            Thread.Sleep(wait * 1000);
+            Thread.Sleep(wait);
             wait = 0;
 
             List<string> takeTuple;
@@ -61,7 +63,7 @@ namespace Client
 
         public void Read(String tuple)
         {
-            Thread.Sleep(wait * 1000);
+            Thread.Sleep(wait);
             wait = 0;
 
             List<string> readTuple;
@@ -88,12 +90,27 @@ namespace Client
             List<string> returnValue = new List<string>();
             tuple = tuple.Trim('<');
             tuple = tuple.Trim('>');
-            string[] words = tuple.Split(',');
 
-            for(int i = 0; i < words.Length; i++)
+            int aux = 0;
+            bool ignore = false;
+
+            for(int i = 0; i < tuple.Length; i++)
             {
-                returnValue.Add(words[i]);
+                if(tuple[i] == ',' && !ignore)
+                {
+                    returnValue.Add(tuple.Substring(aux, i - aux));
+                    aux = i + 1;
+                }
+                else if(tuple[i] == '(')
+                {
+                    ignore = true;
+                }
+                else if (tuple[i] == ')')
+                {
+                    ignore = false;
+                }
             }
+            returnValue.Add(tuple.Substring(aux, tuple.Length - aux));
 
             return returnValue;
         }
