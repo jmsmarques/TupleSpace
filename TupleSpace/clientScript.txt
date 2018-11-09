@@ -1,7 +1,7 @@
 add <"a",DADTestA(1,"b")>
-begin-repeat 3
+begin-repeat 2
 read <"*",null>
-wait 500
+wait 5000
 read <"a*",DADTestA>
 read <"*a",DADTestA(1,"b")>
 end-repeat

@@ -21,9 +21,10 @@ namespace Client
         }
 
         public void Add(String tuple)
-        {            
-            Thread.Sleep(wait);
+        {
+            int aux = wait;
             wait = 0;
+            Thread.Sleep(aux);
 
             List<string> addTuple;
 
@@ -42,8 +43,9 @@ namespace Client
 
         public void Take(String tuple)
         {
-            Thread.Sleep(wait);
+            int aux = wait;
             wait = 0;
+            Thread.Sleep(aux);
 
             List<string> takeTuple;
 
@@ -61,10 +63,11 @@ namespace Client
             PrintTuple(takeTuple);
         }
 
-        public void Read(String tuple)
+        public async Task Read(String tuple)
         {
-            Thread.Sleep(wait);
+            int aux = wait;
             wait = 0;
+            await Task.Delay(5000);
 
             List<string> readTuple;
 
