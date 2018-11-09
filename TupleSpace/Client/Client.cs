@@ -53,7 +53,6 @@ namespace Client
 
         private static void Exec(ClientObj client)
         {
-            int loop = 1;
             string input;
             bool go = true;
             string line;
@@ -68,43 +67,61 @@ namespace Client
                     string[] words = line.Split(' ');
                     switch (words[0])
                     {
-                        case "add":
-                            for (int i = 0; i < loop; i++)
-                            {
-                                client.Add(words[1]);
-                            }
-                            break;
-                        case "read":
-                            for (int i = 0; i < loop; i++)
-                            {
-                                client.Read(words[1]);
-                            }
-                            break;
-                        case "take":
-                            for (int i = 0; i < loop; i++)
-                            {
-                                client.Take(words[1]);
-                            }
-                            break;
-                        case "wait":
-                            client.Wait = System.Convert.ToInt32(words[1]);
-                            break;
                         case "begin-repeat":
-                            loop = System.Convert.ToInt32(words[1]);
-                            break;
-                        case "end-repeat":
-                            loop = 1;
+                            BeginRepeat(client, file, System.Convert.ToInt32(words[1]));
                             break;
                         case "exit":
                         case "Exit":
                             go = false;
                             break;
                         default:
-                            Console.WriteLine("Command not recognized.\n");
+                            ReadCommand(client, words[0], words[1]);
                             break;
-                    }
+                    }                    
                 }
                 
+            }
+        }
+
+        private static void ReadCommand(ClientObj client, string command, string parameters)
+        {
+            switch (command)
+            {
+                case "add":
+                    client.Add(parameters);
+                    break;
+                case "read":
+                    client.Read(parameters);
+                    break;
+                case "take":
+                    client.Take(parameters);
+                    break;
+                case "wait":
+                    client.Wait = System.Convert.ToInt32(parameters);
+                    break;
+                default:
+                    Console.WriteLine("Command not recognized.\n");
+                    break;
+            }
+        }
+
+        private static void BeginRepeat(ClientObj client, System.IO.StreamReader file, int loop)
+        {
+            string line;
+            bool end = false;
+            while ((line = file.ReadLine()) != null && !end)
+            {
+                //System.Console.WriteLine(line);
+                string[] words = line.Split(' ');
+                switch (words[0])
+                {
+                    case "end-repeat":
+                        end = true;
+                        break;
+                    default:
+                        ReadCommand(client, words[0], words[1]);
+                        break;
+                }
             }
         }
 
