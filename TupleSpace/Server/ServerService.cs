@@ -49,42 +49,44 @@ namespace Server
         public List<string> Read(List<string> tuple)
         {
             int aux;
-            foreach(List<string> tup in tuples)
+            while (true)
             {
-                aux = 0;
-                if (tup.Count == tuple.Count)
+                foreach (List<string> tup in tuples)
                 {
-                    for (int i = 0; i < tuple.Count; i++)
+                    aux = 0;
+                    if (tup.Count == tuple.Count)
                     {
-                        if(tup[i][0] == '\"') //string
+                        for (int i = 0; i < tuple.Count; i++)
                         {
-                            if (CmpString(tup[i], tuple[i]))
+                            if (tup[i][0] == '\"') //string
                             {
-                                aux++;
+                                if (CmpString(tup[i], tuple[i]))
+                                {
+                                    aux++;
+                                }
+                                else
+                                {
+                                    break;
+                                }
                             }
-                            else
+                            else //object
                             {
-                                break;
+                                if (tuple[i].Equals("null") || tuple[i].Equals(tup[i])
+                                    || CmpObjectType(tuple[i], tup[i]))
+                                {
+                                    aux++;
+                                }
+                                else
+                                {
+                                    break;
+                                }
                             }
+
                         }
-                        else //object
-                        {                            
-                            if (tuple[i].Equals("null") || tuple[i].Equals(tup[i]) 
-                                || CmpObjectType(tuple[i], tup[i]))
-                            {
-                                aux++;
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                        
+                        if (aux == tuple.Count) { return tup; }
                     }
-                    if (aux == tuple.Count) {return tup; } 
                 }
-            }
-            return null;
+            }            
         }
 
         public List<string> Take(List<string> tuple)

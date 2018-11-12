@@ -67,6 +67,8 @@ namespace Client
             foreach (IServerService server in view)
             {
                 readTuple = server.Read(readTuple);
+                if (readTuple != null)
+                    break;
             }
 
             PrintTuple(readTuple);
