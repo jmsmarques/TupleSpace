@@ -10,7 +10,6 @@ namespace Client
 {
     class ClientObj
     {
-        private int wait;
         private List<IServerService> view;
         private readonly int comType; //1 for SMR 2 for XL
 
@@ -22,10 +21,6 @@ namespace Client
 
         public void Add(String tuple)
         {
-            int aux = wait;
-            wait = 0;
-            Thread.Sleep(aux);
-
             List<string> addTuple;
 
             addTuple = TransformToTuple(tuple);
@@ -43,10 +38,6 @@ namespace Client
 
         public void Take(String tuple)
         {
-            int aux = wait;
-            wait = 0;
-            Thread.Sleep(aux);
-
             List<string> takeTuple;
 
             takeTuple = TransformToTuple(tuple);
@@ -63,12 +54,8 @@ namespace Client
             PrintTuple(takeTuple);
         }
 
-        public async Task Read(String tuple)
+        public void Read(String tuple)
         {
-            int aux = wait;
-            wait = 0;            
-            await Task.Delay(aux);
-
             List<string> readTuple;
 
             readTuple = TransformToTuple(tuple);
@@ -84,9 +71,6 @@ namespace Client
 
             PrintTuple(readTuple);
         }
-
-        public int Wait
-        { set { this.wait = value; } }
 
         private List<string> TransformToTuple(String tuple)
         {

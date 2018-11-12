@@ -97,7 +97,7 @@ namespace Client
                     client.Take(parameters);
                     break;
                 case "wait":
-                    client.Wait = System.Convert.ToInt32(parameters);
+                    Thread.Sleep(System.Convert.ToInt32(parameters));
                     break;
                 default:
                     Console.WriteLine("Command not recognized.\n");

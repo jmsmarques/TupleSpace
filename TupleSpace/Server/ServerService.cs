@@ -68,8 +68,9 @@ namespace Server
                             }
                         }
                         else //object
-                        {
-                            if (tuple[i].Equals("null") || tuple[i].Equals(tup[i]))
+                        {                            
+                            if (tuple[i].Equals("null") || tuple[i].Equals(tup[i]) 
+                                || CmpObjectType(tuple[i], tup[i]))
                             {
                                 aux++;
                             }
@@ -130,6 +131,23 @@ namespace Server
                 }
             }
 
+            return false;
+        }
+
+        private bool CmpObjectType(string tuple, string tup)
+        {
+            for (int n = 0; n < tuple.Length; n++)
+            {
+                if (tuple[n] == '(')
+                {
+                    return false;
+                    
+                }
+            }
+            if (tuple.Equals(tup.Substring(0, tuple.Length)))
+            {
+                return true;
+            }
             return false;
         }
     }
