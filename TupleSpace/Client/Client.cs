@@ -60,26 +60,31 @@ namespace Client
             {                
 
                 input = Console.ReadLine();
-                System.IO.StreamReader file = new System.IO.StreamReader(input);
-                while ((line = file.ReadLine()) != null)
+                try
                 {
-                    //System.Console.WriteLine(line);
-                    string[] words = line.Split(' ');
-                    switch (words[0])
+                    System.IO.StreamReader file = new System.IO.StreamReader(input);
+                    while ((line = file.ReadLine()) != null)
                     {
-                        case "begin-repeat":
-                            BeginRepeat(client, file, System.Convert.ToInt32(words[1]));
-                            break;
-                        case "exit":
-                        case "Exit":
-                            go = false;
-                            break;
-                        default:
-                            ReadCommand(client, words[0], words[1]);
-                            break;
-                    }                    
+                        //System.Console.WriteLine(line);
+                        string[] words = line.Split(' ');
+                        switch (words[0])
+                        {
+                            case "begin-repeat":
+                                BeginRepeat(client, file, System.Convert.ToInt32(words[1]));
+                                break;
+                            case "exit":
+                            case "Exit":
+                                go = false;
+                                break;
+                            default:
+                                ReadCommand(client, words[0], words[1]);
+                                break;
+                        }
+                    }
+                } catch(FileNotFoundException)
+                {
+                    Console.WriteLine("File doesn't exists");
                 }
-                
             }
         }
 
