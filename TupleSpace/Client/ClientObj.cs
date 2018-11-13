@@ -30,10 +30,15 @@ namespace Client
                 view = view[0].GetView();
             }
 
-            foreach(IServerService server in view)
+            Task[] tasks = new Task[view.Count];
+            int i = 0;
+            foreach (IServerService server in view)
             {
-                server.Add(addTuple);
+                Task t = Task.Run(() => server.Add(addTuple));
+                tasks[i] = t;
+                i++;
             }
+            Task.WaitAll(tasks);
         }
 
         public void Take(String tuple)
@@ -64,12 +69,16 @@ namespace Client
             {
                 view = view[0].GetView();
             }
+
+            Task[] tasks = new Task[view.Count];
+            int i = 0;
             foreach (IServerService server in view)
             {
-                readTuple = server.Read(readTuple);
-                if (readTuple != null)
-                    break;
+                Task t = Task.Run(() => readTuple = server.Read(readTuple));
+                tasks[i] = t;
+                i++;
             }
+            Task.WaitAny(tasks);
 
             PrintTuple(readTuple);
         }

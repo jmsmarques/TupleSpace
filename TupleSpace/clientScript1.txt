@@ -1,0 +1,5 @@
+add <"miguel","quinaz">
+read <"jorge">
+begin-repeat 20
+read <"*","*">
+end-repeat

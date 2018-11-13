@@ -47,7 +47,7 @@ namespace Server
         }
 
         public List<string> Read(List<string> tuple)
-        {
+        {            
             int aux;
             while (true)
             {
