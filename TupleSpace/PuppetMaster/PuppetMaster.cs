@@ -28,7 +28,6 @@ namespace PuppetMaster
                 file = args[0];
             }
             
-
             PuppetMasterServices puppetMaster = new PuppetMasterServices(file);
 
             Exec(puppetMaster);

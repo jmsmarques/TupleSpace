@@ -1,5 +1,4 @@
-﻿using ClientLibrary;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PuppetMaster
 {
-    public class PcsService : MarshalByRefObject, ITeste
+    public class PcsService : MarshalByRefObject
     {   
         public void StartServer(string serverID, string Url, int minDelay, int maxDelay)
         {

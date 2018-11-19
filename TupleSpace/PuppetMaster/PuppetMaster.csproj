@@ -44,10 +44,6 @@
     <Reference Include="System.Runtime.Remoting" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ClientLibrary\ClientLibrary.csproj">
-      <Project>{51D3E733-5143-44EE-9C95-9F832EDD8E58}</Project>
-      <Name>ClientLibrary</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Pcs\Pcs.csproj">
       <Project>{69c33968-341f-4dc4-907e-35ff47bba96c}</Project>
       <Name>Pcs</Name>

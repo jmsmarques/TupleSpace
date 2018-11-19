@@ -28,9 +28,10 @@ namespace PuppetMaster
                 while ((line = file.ReadLine()) != null)
                 {
                     serverLoc = "tcp://" + line + ":" + "10000/PcsService";
+                    
                     PcsService obj = (PcsService)Activator.GetObject(
                         typeof(PcsService),
-                        line);
+                        serverLoc);
 
                     Pcs.Add(obj);
                 }                  
@@ -45,6 +46,7 @@ namespace PuppetMaster
             {
                 pc.StartServer(serverID, Url, 1, 1);
             }
+            Console.WriteLine("Server Started at {0}", Url);
         }
 
         public void StartClient(string serverID, string Url, string scriptFile)

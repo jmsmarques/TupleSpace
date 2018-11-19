@@ -40,13 +40,13 @@
     <Compile Include="ServerService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="System.Runtime.Remoting" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\ClientLibrary\ClientLibrary.csproj">
       <Project>{51d3e733-5143-44ee-9c95-9f832edd8e58}</Project>
       <Name>ClientLibrary</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Runtime.Remoting" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
