@@ -16,9 +16,18 @@ namespace PuppetMaster
         static void Main(string[] args)
         {
             //port 10001 reserved
-            Console.WriteLine("Configuration File");
+            string file;
 
-            string file = Console.ReadLine();
+            if (args.Length == 0)
+            {
+                Console.WriteLine("Configuration File");
+                file = Console.ReadLine();
+            }
+            else
+            {
+                file = args[0];
+            }
+            
 
             PuppetMasterServices puppetMaster = new PuppetMasterServices(file);
 
