@@ -18,8 +18,17 @@ namespace Server
         {
             string[] conf;
             string serverLoc = null;
+            if(args.Length == 0) //le do ficheiro
+            {
+                conf = ReadConfFile(); //pos 0 is port -- pos 1 is type
+            }
+            else //le dos argumentos
+            {
+                conf = ReadArgs(args);
 
-            conf = ReadConfFile(); //pos 0 is port -- pos 1 is type
+            }
+            
+
             if (!conf[2].Equals("null"))
             {
                 serverLoc = "tcp://" + conf[2] + ":" + conf[3] + "/MyRemoteObject";
@@ -88,6 +97,34 @@ namespace Server
                 }
             }
 
+            return result;
+        }
+
+        private static string[] ReadArgs(string[] args)
+        {
+            string[] result = new string[4];
+
+            result[0] = args[0];
+           
+            if (args[1].Equals("SMR"))
+            {
+                result[1] = "1";
+            }
+            else if (args[1].Equals("XL"))
+            {
+                result[1] = "2";
+            }
+
+            result[2] = args[2];
+
+            if (result[2].Equals("null"))
+            {
+                result[3] = null;
+            }
+            else
+            {
+                result[3] = args[3];
+            }      
             return result;
         }
     }

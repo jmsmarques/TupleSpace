@@ -16,8 +16,17 @@ namespace Client
     {
         static void Main(string[] args)
         {
-            string[] aux = ReadConfFile();
+            string[] aux;
             int comType;
+
+            if(args.Length == 0) //read from file
+            {
+                aux = ReadConfFile();
+            }
+            else //arguments
+            {
+                aux = ReadArgs(args);
+            }
 
             string serverLoc = "tcp://" + aux[0] + ":" + aux[1] + "/MyRemoteObject";
 
@@ -175,6 +184,25 @@ namespace Client
                 }
             }
             return aux;
+        }
+
+        private static string[] ReadArgs(string[] args)
+        {
+            string[] result = new string[4];
+
+            result[0] = args[0];
+            result[1] = args[1];
+
+            if (args[2].Equals("SMR"))
+            {
+                result[2] = "SMR";
+            }
+            else if (args[2].Equals("XL"))
+            {
+                result[2] = "XL";
+            }
+
+            return result;
         }
     }
 }
