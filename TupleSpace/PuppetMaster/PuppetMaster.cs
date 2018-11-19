@@ -15,18 +15,23 @@ namespace PuppetMaster
     {
         static void Main(string[] args)
         {
-            Pcs puppetMaster = new Pcs();
+            //port 10001 reserved
+            Console.WriteLine("Configuration File");
+
+            string file = Console.ReadLine();
+
+            PuppetMasterServices puppetMaster = new PuppetMasterServices(file);
+
             Exec(puppetMaster);
         }
 
-        static void Exec(Pcs pcs)
+        static void Exec(PuppetMasterServices pcs)
         {
-            string input, line;
+            string line;
             bool go = true;
-
+            Console.WriteLine("Welcome Puppet Master");
             while(go)
             {
-                input = Console.ReadLine();
                 try
                 {
                     //System.IO.StreamReader file = new System.IO.StreamReader(input);

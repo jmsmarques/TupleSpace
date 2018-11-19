@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Diagnostics;
 
 namespace PuppetMaster
 {
-    class Pcs
-    {
+    public class PcsService : MarshalByRefObject
+    {   
         public void StartServer(string serverIDd, string Url, int minDelay, int maxDelay)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.CreateNoWindow = false;
-            startInfo.UseShellExecute = false;
-            startInfo.FileName = "../../Server/bin/DebugServer.exe";
-            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            startInfo.CreateNoWindow = true;
+            startInfo.UseShellExecute = true;
+            startInfo.FileName = "Server.exe";
+            startInfo.WindowStyle = ProcessWindowStyle.Normal;
             startInfo.Arguments = Url + " SMR " + "null";
             try
             {
@@ -31,7 +31,6 @@ namespace PuppetMaster
                 Console.WriteLine("Exe doesn't exist");
                 // Log error.
             }
-
             //return null;
         }
 
