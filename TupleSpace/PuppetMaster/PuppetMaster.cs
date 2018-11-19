@@ -38,7 +38,7 @@ namespace PuppetMaster
         {
             string line;
             bool go = true;
-            Console.WriteLine("Welcome Puppet Master");
+            
             while(go)
             {
                 try

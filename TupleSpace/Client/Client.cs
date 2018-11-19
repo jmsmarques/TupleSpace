@@ -46,6 +46,9 @@ namespace Client
 
             Console.WriteLine(serverLoc);
 
+            TcpChannel channel = new TcpChannel();
+            ChannelServices.RegisterChannel(channel, true);
+
             IServerService obj = (IServerService)Activator.GetObject(
                     typeof(IServerService),
                     serverLoc);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ClientLibrary;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace PuppetMaster
 {
-    public class PcsService : MarshalByRefObject
+    public class PcsService : MarshalByRefObject, ITeste
     {   
-        public void StartServer(string serverIDd, string Url, int minDelay, int maxDelay)
+        public void StartServer(string serverID, string Url, int minDelay, int maxDelay)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.CreateNoWindow = true;
@@ -34,12 +35,12 @@ namespace PuppetMaster
             //return null;
         }
 
-        public void StartClient(string serverIDd, string Url, string scriptFile)
+        public void StartClient(string serverID, string Url, string scriptFile)
         {
             // Use ProcessStartInfo class
             ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.CreateNoWindow = false;
-            startInfo.UseShellExecute = false;
+            startInfo.CreateNoWindow = true;
+            startInfo.UseShellExecute = true;
             startInfo.FileName = "Client.exe";
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
             startInfo.Arguments = "";

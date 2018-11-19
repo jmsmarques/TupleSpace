@@ -18,4 +18,9 @@ namespace ClientLibrary
 
         void Wait(int x);
     }
+
+    public interface ITeste
+    {
+        void PrintStatus();
+    }
 }

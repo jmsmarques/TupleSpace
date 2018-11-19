@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ClientLibrary;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Remoting;
@@ -17,7 +18,11 @@ namespace PuppetMaster
             ChannelServices.RegisterChannel(channel, false);
             PcsService mo = new PcsService();
             RemotingServices.Marshal(mo,"PcsService",
-            typeof(PcsService));
+                typeof(PcsService));
+
+            Console.WriteLine("PCS");
+            Console.WriteLine("Press <enter> to exit...");
+            Console.ReadLine();
         }
     }
 
