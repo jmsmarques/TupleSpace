@@ -13,6 +13,7 @@ namespace Server
         private List<IServerService> view;
         private List<List<string>> tuples;  
         private readonly int comType; //1 for SMR 2 for XL
+        private static object _lock = new object();
 
         public ServerService(int comType)
         {            
@@ -42,57 +43,62 @@ namespace Server
         //client functions
         public void Add(List<string> tuple)
         {
-            tuples.Add(tuple);
+            lock (_lock)
+            {
+                tuples.Add(tuple);
+            }            
             Console.WriteLine("funciona");
         }
 
         public List<string> Read(List<string> tuple)
         {            
             int aux;
-            while (true)
+            foreach (List<string> tup in tuples)
             {
-                foreach (List<string> tup in tuples)
+                aux = 0;
+                if (tup.Count == tuple.Count)
                 {
-                    aux = 0;
-                    if (tup.Count == tuple.Count)
+                    for (int i = 0; i < tuple.Count; i++)
                     {
-                        for (int i = 0; i < tuple.Count; i++)
+                        if (tup[i][0] == '\"') //string
                         {
-                            if (tup[i][0] == '\"') //string
+                            if (CmpString(tup[i], tuple[i]))
                             {
-                                if (CmpString(tup[i], tuple[i]))
-                                {
-                                    aux++;
-                                }
-                                else
-                                {
-                                    break;
-                                }
+                                aux++;
                             }
-                            else //object
+                            else
                             {
-                                if (tuple[i].Equals("null") || tuple[i].Equals(tup[i])
-                                    || CmpObjectType(tuple[i], tup[i]))
-                                {
-                                    aux++;
-                                }
-                                else
-                                {
-                                    break;
-                                }
+                                break;
                             }
-
                         }
-                        if (aux == tuple.Count) { return tup; }
+                        else //object
+                        {
+                            if (tuple[i].Equals("null") || tuple[i].Equals(tup[i])
+                                || CmpObjectType(tuple[i], tup[i]))
+                            {
+                                aux++;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+
                     }
+                    if (aux == tuple.Count) { return tup; }
                 }
-            }            
+            }
+            return null;
+                 
         }
 
         public List<string> Take(List<string> tuple)
         {            
             List<string> returnValue = Read(tuple);
-            tuples.Remove(returnValue);
+            lock (_lock)
+            {
+                tuples.Remove(returnValue);
+            }           
             return returnValue;
         }
 
