@@ -8,6 +8,7 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
 namespace PuppetMaster
 {
@@ -36,48 +37,78 @@ namespace PuppetMaster
         static void Exec(PuppetMasterServices pcs)
         {
             string line;
-            bool go = true;
-            
-            while(go)
+
+            while (true)
+            {
+                while ((line = Console.ReadLine()) != null)
+                {
+                    //System.Console.WriteLine(line);
+                    string[] words = line.Split(' ');
+                    ReadCommand(pcs, words);
+                }
+            }
+        }
+
+        static void ExecFile(PuppetMasterServices pcs, string input)
+        {
+            string line;
+
+            while (true)
             {
                 try
                 {
-                    //System.IO.StreamReader file = new System.IO.StreamReader(input);
-                    while ((line = Console.ReadLine()) != null)
+                    System.IO.StreamReader file = new System.IO.StreamReader(input);
+                    while ((line = file.ReadLine()) != null)
                     {
                         //System.Console.WriteLine(line);
                         string[] words = line.Split(' ');
-                        switch (words[0])
-                        {
-                            case "Server":
-                                Console.WriteLine("...");
-                                Task.Run(() => pcs.StartServer(words[1], words[2], 1, 1));
-                                break;
-                            case "Client":
-                                Console.WriteLine("...");
-                                Task.Run(() => pcs.StartClient(words[1], words[2], words[3]));
-                                break;
-                            case "Status":
-                                Console.WriteLine("...");
-                                Task.Run(() => pcs.PrintStatus());
-                                break;
-                            case "exit":
-                            case "Exit":
-                                go = false;
-                                break;
-                            default:
-                                Console.WriteLine("Invalid command");
-                                break;
-                        }
+                        ReadCommand(pcs, words);
                     }
                 }
                 catch (FileNotFoundException)
                 {
                     Console.WriteLine("File doesn't exists");
                 }
+                catch (ArgumentException)
+                {
+                    Console.WriteLine("Invalid Command");
+                }               
             }
         }
 
-        
-    }
+        static void ReadCommand(PuppetMasterServices pcs, string[] words)
+        {
+            switch (words[0])
+            {
+                case "Server":
+                    Console.WriteLine("...");
+                    Task.Run(() => pcs.StartServer(words[1], words[2],
+                        System.Convert.ToInt32(words[3]), System.Convert.ToInt32(words[4])));
+                    break;
+                case "Client":
+                    Console.WriteLine("...");
+                    Task.Run(() => pcs.StartClient(words[1], words[2], words[3]));
+                    break;
+                case "Status":
+                    Console.WriteLine("...");
+                    Task.Run(() => pcs.PrintStatus());
+                    break;
+                case "Wait":
+                    Thread.Sleep(System.Convert.ToInt32(words[1]));
+                    break;
+                case "Crash":
+                    Task.Run(() => pcs.Crash(words[1], words[2]));
+                    break;
+                case "Freeze":
+                    Task.Run(() => pcs.Freeze());
+                    break;
+                case "Unfreeze":
+                    Task.Run(() => pcs.Unfreeze());
+                    break;   
+                default:
+                    ExecFile(pcs, words[0]);
+                    break;
+            }
+        }
+    }        
 }

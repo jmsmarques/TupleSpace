@@ -18,14 +18,16 @@ namespace Server
         {
             string[] conf;
             string serverLoc = null;
+            int maxDelay = 0, minDelay = 0;
             if(args.Length == 0) //le do ficheiro
             {
                 conf = ReadConfFile(); //pos 0 is port -- pos 1 is type
             }
             else //le dos argumentos
             {
-                conf = ReadArgs(args);
-
+                conf = ReadArgs(args);                
+                minDelay = System.Convert.ToInt32(args[5]);
+                maxDelay = System.Convert.ToInt32(args[6]);
             }
             
 
@@ -43,7 +45,7 @@ namespace Server
                         
             ChannelServices.RegisterChannel(channel, true);
 
-            ServerService mo = new ServerService(System.Convert.ToInt32(conf[1]));
+            ServerService mo = new ServerService(System.Convert.ToInt32(conf[1]), minDelay, maxDelay);
 
             if(serverLoc != null)
             {

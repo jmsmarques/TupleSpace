@@ -47,7 +47,7 @@ namespace PuppetMaster
             {
                 if(pc.Location.Equals("localhost:" + Url))
                 {
-                    result = pc.StartServer(serverID, serverID, 1, 1);
+                    result = pc.StartServer(serverID, serverID, minDelay, maxDelay);
                     break;
                 }                
             }
@@ -59,10 +59,20 @@ namespace PuppetMaster
 
         public void StartClient(string serverID, string Url, string scriptFile)
         {
+            string result = null;
             foreach (PcsService pc in Pcs)
             {
-                pc.StartClient(serverID, Url, scriptFile);
+                if (pc.Location.Equals("localhost:" + Url))
+                {
+                    result = pc.StartClient(serverID, Url, scriptFile);
+                    break;
+                }                
             }
+
+            if (result == null)
+                Console.WriteLine("Invalid Location");
+            else
+                Console.WriteLine(result);      
         }
 
         public void PrintStatus()
@@ -71,6 +81,33 @@ namespace PuppetMaster
             {
                 pc.PrintStatus();
             }
+        }
+
+        public void Crash(string url, string serverId)
+        {
+            string result = null;
+            foreach (PcsService pc in Pcs)
+            {
+                if (pc.Location.Equals("localhost:" + url))
+                {
+                    result = pc.Crash(serverId);
+                    break;
+                }
+            }
+            if (result == null)
+                Console.WriteLine("Invalid Location");
+            else
+                Console.WriteLine(result);
+        }
+
+        public void Freeze()
+        {
+
+        }
+
+        public void Unfreeze()
+        {
+
         }
     }
 }

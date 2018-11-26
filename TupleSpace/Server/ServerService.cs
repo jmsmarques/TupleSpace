@@ -14,13 +14,16 @@ namespace Server
         private List<List<string>> tuples;  
         private readonly int comType; //1 for SMR 2 for XL
         private static object _lock = new object();
+        private int maxDelay, minDelay;
 
-        public ServerService(int comType)
+        public ServerService(int comType, int min, int max)
         {            
             view = new List<IServerService>();            
             view.Add(this);
             tuples = new List<List<string>>();
             this.comType = comType;
+            maxDelay = max;
+            minDelay = min;
         }
 
         //server functions
