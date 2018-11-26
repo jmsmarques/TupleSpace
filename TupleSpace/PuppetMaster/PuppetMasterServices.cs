@@ -11,7 +11,7 @@ namespace PuppetMaster
 {
     class PuppetMasterServices
     {
-        private List<PcsService> Pcs;
+        private List<PcsService> Pcs;     
 
         public PuppetMasterServices(string confFile)
         {
@@ -42,11 +42,19 @@ namespace PuppetMaster
 
         public void StartServer(string serverID, string Url, int minDelay, int maxDelay)
         {
+            string result = null;
             foreach(PcsService pc in Pcs)
             {
-                pc.StartServer(serverID, Url, 1, 1);
+                if(pc.Location.Equals("localhost:" + Url))
+                {
+                    result = pc.StartServer(serverID, serverID, 1, 1);
+                    break;
+                }                
             }
-            Console.WriteLine("Server Started at {0}", Url);
+            if (result == null)
+                Console.WriteLine("Invalid Location");
+            else
+                Console.WriteLine(result);
         }
 
         public void StartClient(string serverID, string Url, string scriptFile)

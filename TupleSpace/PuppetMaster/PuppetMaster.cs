@@ -51,13 +51,15 @@ namespace PuppetMaster
                         {
                             case "Server":
                                 Console.WriteLine("...");
-                                pcs.StartServer(words[1], words[2], 1, 1);
+                                Task.Run(() => pcs.StartServer(words[1], words[2], 1, 1));
                                 break;
                             case "Client":
-                                pcs.StartClient(words[1], words[2], words[3]);
+                                Console.WriteLine("...");
+                                Task.Run(() => pcs.StartClient(words[1], words[2], words[3]));
                                 break;
                             case "Status":
-                                pcs.PrintStatus();
+                                Console.WriteLine("...");
+                                Task.Run(() => pcs.PrintStatus());
                                 break;
                             case "exit":
                             case "Exit":

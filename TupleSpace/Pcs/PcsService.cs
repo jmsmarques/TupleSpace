@@ -9,7 +9,16 @@ namespace PuppetMaster
 {
     public class PcsService : MarshalByRefObject
     {   
-        public void StartServer(string serverID, string Url, int minDelay, int maxDelay)
+        private string location;
+
+        public string Location { get { return this.location; } }
+
+        public PcsService(string location)
+        {
+            this.location = location + ":10000";
+        }
+
+        public string StartServer(string serverID, string Url, int minDelay, int maxDelay)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.CreateNoWindow = true;
@@ -29,9 +38,10 @@ namespace PuppetMaster
             catch
             {
                 Console.WriteLine("Exe doesn't exist");
+                return "Unable to start server";
                 // Log error.
             }
-            //return null;
+            return "Server started at " + Url;
         }
 
         public void StartClient(string serverID, string Url, string scriptFile)
@@ -56,7 +66,7 @@ namespace PuppetMaster
             catch
             {
                 // Log error.
-            }
+            }            
         }
 
         public void PrintStatus()

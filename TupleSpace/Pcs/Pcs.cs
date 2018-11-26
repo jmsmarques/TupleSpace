@@ -15,7 +15,11 @@ namespace PuppetMaster
         {
             TcpChannel channel = new TcpChannel(10000);
             ChannelServices.RegisterChannel(channel, false);
-            PcsService mo = new PcsService();
+
+
+            PcsService mo = new PcsService(args[0]); //needs to be fixed
+
+
             RemotingServices.Marshal(mo,"PcsService",
                 typeof(PcsService));
 
