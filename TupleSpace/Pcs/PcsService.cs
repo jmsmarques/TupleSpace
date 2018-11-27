@@ -38,7 +38,7 @@ namespace PuppetMaster
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = true;
-            startInfo.FileName = "Server.exe";
+            startInfo.FileName = "..\\..\\..\\Server\\bin\\Debug\\Server.exe";
             startInfo.WindowStyle = ProcessWindowStyle.Normal;
             startInfo.Arguments = port + " " + type + " null " + minDelay + " " + maxDelay + " " + objName;
             try
@@ -60,7 +60,7 @@ namespace PuppetMaster
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = true;
-            startInfo.FileName = "Client.exe";
+            startInfo.FileName = "..\\..\\..\\Client\\bin\\Debug\\Client.exe";
             startInfo.WindowStyle = ProcessWindowStyle.Normal;
             startInfo.Arguments = serverLoc + " " + type + " < " + scriptFile;
 
