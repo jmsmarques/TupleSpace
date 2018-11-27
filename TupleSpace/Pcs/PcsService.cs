@@ -12,36 +12,36 @@ namespace PuppetMaster
         private List<string[]> processes;
 
         private string location;
+        private string type;
 
         public string Location { get { return this.location; } }
 
-        public PcsService(string location)
+        public PcsService(string location, string type)
         {
-            this.location = location + ":10000";
+            this.location = location;
             processes = new List<string[]>();
+            this.type = type;
         }
 
-        public string StartServer(string serverID, string Url, int minDelay, int maxDelay)
+        public string StartServer(string serverID, string url, int minDelay, int maxDelay)
         {
+            string port, objName;
+
+            string[] words = url.Split('/');
+            string[] words1 = words[2].Split(':');
+
+            objName = words[3];
+            port = words1[1];
+
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = true;
             startInfo.FileName = "Server.exe";
             startInfo.WindowStyle = ProcessWindowStyle.Normal;
-            startInfo.Arguments = Url + " SMR " + "null " + minDelay + " " + maxDelay;
+            startInfo.Arguments = port + " " + type + " null " + minDelay + " " + maxDelay + " " + objName;
             try
             {
-                using (Process exeProcess = Process.Start(startInfo))
-                {
-                    Console.WriteLine("Comecou");
-                    Console.WriteLine(exeProcess.Id);
-                    string[] aux = new string[2];
-                    aux[0] = Url;
-                    aux[1] = System.Convert.ToString(exeProcess.Id);
-                    processes.Add(aux);
-                    exeProcess.WaitForExit();
-                    Console.WriteLine("Terminou");
-                }
+                StartProcess(serverID, startInfo);
             }
             catch
             {
@@ -49,10 +49,10 @@ namespace PuppetMaster
                 return "Unable to start server";
                 // Log error.
             }
-            return "Server started at " + Url;
+            return "Server finished at " + url;
         }
 
-        public string StartClient(string serverID, string Url, string scriptFile)
+        public string StartClient(string serverID, string url, string scriptFile)
         {
             // Use ProcessStartInfo class
             ProcessStartInfo startInfo = new ProcessStartInfo();
@@ -60,16 +60,11 @@ namespace PuppetMaster
             startInfo.UseShellExecute = true;
             startInfo.FileName = "Client.exe";
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            startInfo.Arguments = "";
+            startInfo.Arguments = "localhost:9000 " + type + " < " + scriptFile;
 
             try
             {
-                // Start the process with the info we specified.
-                // Call WaitForExit and then the using statement will close.
-                using (Process exeProcess = Process.Start(startInfo))
-                {
-                    exeProcess.WaitForExit();
-                }
+                StartProcess(serverID, startInfo);
             }
             catch
             {
@@ -77,13 +72,13 @@ namespace PuppetMaster
                 return "Unable to start client";
                 // Log error.
             }
-            return "Client started";
+            return "Client finished at " + url;
         }
 
         public void PrintStatus()
         {
             
-        }
+        } 
 
         public string Crash(string url)
         {
@@ -98,14 +93,45 @@ namespace PuppetMaster
             return "Process Closed";
         }
 
-        public void Freeze()
+        public string Freeze(string url)
         {
-
+            foreach (string[] loc in processes)
+            {
+                if (url.Equals(loc[0]))
+                {
+                    //Process.GetProcessById(System.Convert.ToInt32(loc[1])).Kill();
+                    break;
+                }
+            }
+            return "Process Frezeed";
         }
 
-        public void Unfreeze()
+        public string  Unfreeze(string url)
         {
+            foreach (string[] loc in processes)
+            {
+                if (url.Equals(loc[0]))
+                {
+                    //Process.GetProcessById(System.Convert.ToInt32(loc[1])).Kill();
+                    break;
+                }
+            }
+            return "Process Resumed";
+        }
 
+        private void StartProcess(string serverID, ProcessStartInfo startInfo)
+        {
+            using (Process exeProcess = Process.Start(startInfo))
+            {
+                Console.WriteLine("{0} Comecou", serverID);
+                Console.WriteLine(exeProcess.Id);
+                string[] aux = new string[2];
+                aux[0] = serverID;
+                aux[1] = System.Convert.ToString(exeProcess.Id);
+                processes.Add(aux);
+                exeProcess.WaitForExit();
+                Console.WriteLine("{0} Terminou ", serverID);
+            }
         }
     }
 }

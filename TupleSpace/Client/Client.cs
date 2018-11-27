@@ -28,13 +28,13 @@ namespace Client
                 aux = ReadArgs(args);
             }
 
-            string serverLoc = "tcp://" + aux[0] + ":" + aux[1] + "/MyRemoteObject";
+            string serverLoc = "tcp://" + aux[0] + "/MyRemoteObject";
 
-            if(aux[2].Equals("SMR"))
+            if(aux[1].Equals("SMR"))
             {
                 comType = 1;
             }
-            else if (aux[2].Equals("XL"))
+            else if (aux[1].Equals("XL"))
             {
                 comType = 2;
             }
@@ -71,15 +71,15 @@ namespace Client
                 input = Console.ReadLine();
                 try
                 {
-                    System.IO.StreamReader file = new System.IO.StreamReader(input);
-                    while ((line = file.ReadLine()) != null)
+                    //System.IO.StreamReader file = new System.IO.StreamReader(input);
+                    while ((line = Console.ReadLine()) != null)
                     {
                         //System.Console.WriteLine(line);
                         string[] words = line.Split(' ');
                         switch (words[0])
                         {
                             case "begin-repeat":
-                                BeginRepeat(client, file, System.Convert.ToInt32(words[1]));
+                                BeginRepeat(client, System.Convert.ToInt32(words[1]));
                                 break;
                             case "exit":
                             case "Exit":
@@ -119,13 +119,13 @@ namespace Client
             }
         }
 
-        private static void BeginRepeat(ClientObj client, System.IO.StreamReader file, int loop)
+        private static void BeginRepeat(ClientObj client, int loop)
         {
             string line;
             bool end = false;
             List<string[]> commands = new List<string[]>();
 
-            while ((line = file.ReadLine()) != null && !end)
+            while ((line = Console.ReadLine()) != null && !end)
             {
                 //System.Console.WriteLine(line);
                 string[] words = line.Split(' ');
@@ -160,21 +160,17 @@ namespace Client
                     words = line.Split(':');
                     if (words[0].Equals("Server"))
                     {
-                        aux[0] = words[1];
+                        aux[0] = words[1] + ":" + words[2];
                     } 
-                    else if(words[0].Equals("Port"))
-                    {
-                        aux[1] = words[1];
-                    }
                     else if (words[0].Equals("Type"))
                     {
                         if (words[1].Equals("SMR"))
                         {
-                            aux[2] = "SMR";
+                            aux[1] = "SMR";
                         }
                         else if (words[1].Equals("XL"))
                         {
-                            aux[2] = "XL";
+                            aux[1] = "XL";
                         }
                         else
                         {
@@ -188,18 +184,17 @@ namespace Client
 
         private static string[] ReadArgs(string[] args)
         {
-            string[] result = new string[4];
+            string[] result = new string[3];
 
             result[0] = args[0];
-            result[1] = args[1];
 
-            if (args[2].Equals("SMR"))
+            if (args[1].Equals("SMR"))
             {
-                result[2] = "SMR";
+                result[1] = "SMR";
             }
-            else if (args[2].Equals("XL"))
+            else if (args[1].Equals("XL"))
             {
-                result[2] = "XL";
+                result[1] = "XL";
             }
 
             return result;

@@ -40,14 +40,17 @@ namespace PuppetMaster
             Console.WriteLine("Welcome Puppet Master");
         }
 
-        public void StartServer(string serverID, string Url, int minDelay, int maxDelay)
+        public void StartServer(string serverID, string url, int minDelay, int maxDelay)
         {
             string result = null;
-            foreach(PcsService pc in Pcs)
-            {
-                if(pc.Location.Equals("localhost:" + Url))
+            string[] words = url.Split('/');
+            words = words[2].Split(':');
+
+            foreach (PcsService pc in Pcs)
+            {                
+                if(pc.Location.Equals(words[0]))
                 {
-                    result = pc.StartServer(serverID, serverID, minDelay, maxDelay);
+                    result = pc.StartServer(serverID, url, minDelay, maxDelay);
                     break;
                 }                
             }
@@ -57,14 +60,14 @@ namespace PuppetMaster
                 Console.WriteLine(result);
         }
 
-        public void StartClient(string serverID, string Url, string scriptFile)
+        public void StartClient(string serverID, string url, string scriptFile)
         {
-            string result = null;
+            string result = null;    
             foreach (PcsService pc in Pcs)
             {
-                if (pc.Location.Equals("localhost:" + Url))
+                if (pc.Location.Equals("localhost"))
                 {
-                    result = pc.StartClient(serverID, Url, scriptFile);
+                    result = pc.StartClient(serverID, url, scriptFile);
                     break;
                 }                
             }
@@ -100,14 +103,38 @@ namespace PuppetMaster
                 Console.WriteLine(result);
         }
 
-        public void Freeze()
+        public void Freeze(string url, string serverId)
         {
-
+            string result = null;
+            foreach (PcsService pc in Pcs)
+            {
+                if (pc.Location.Equals("localhost:" + url))
+                {
+                    result = pc.Crash(serverId);
+                    break;
+                }
+            }
+            if (result == null)
+                Console.WriteLine("Invalid Location");
+            else
+                Console.WriteLine(result);
         }
 
-        public void Unfreeze()
+        public void Unfreeze(string url, string serverId)
         {
-
+            string result = null;
+            foreach (PcsService pc in Pcs)
+            {
+                if (pc.Location.Equals("localhost:" + url))
+                {
+                    result = pc.Crash(serverId);
+                    break;
+                }
+            }
+            if (result == null)
+                Console.WriteLine("Invalid Location");
+            else
+                Console.WriteLine(result);
         }
     }
 }

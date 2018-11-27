@@ -37,44 +37,36 @@ namespace PuppetMaster
         static void Exec(PuppetMasterServices pcs)
         {
             string line;
-
-            while (true)
+            while ((line = Console.ReadLine()) != null)
             {
-                while ((line = Console.ReadLine()) != null)
+                //System.Console.WriteLine(line);
+                string[] words = line.Split(' ');
+                ReadCommand(pcs, words);
+            }            
+        }
+
+        static void ExecFile(PuppetMasterServices pcs, string input)
+        {
+            string line;   
+            try
+            {
+                System.IO.StreamReader file = new System.IO.StreamReader(input);
+                while ((line = file.ReadLine()) != null)
                 {
                     //System.Console.WriteLine(line);
                     string[] words = line.Split(' ');
                     ReadCommand(pcs, words);
                 }
             }
-        }
-
-        static void ExecFile(PuppetMasterServices pcs, string input)
-        {
-            string line;
-
-            while (true)
+            catch (FileNotFoundException)
             {
-                try
-                {
-                    System.IO.StreamReader file = new System.IO.StreamReader(input);
-                    while ((line = file.ReadLine()) != null)
-                    {
-                        //System.Console.WriteLine(line);
-                        string[] words = line.Split(' ');
-                        ReadCommand(pcs, words);
-                    }
-                }
-                catch (FileNotFoundException)
-                {
-                    Console.WriteLine("File doesn't exists");
-                }
-                catch (ArgumentException)
-                {
-                    Console.WriteLine("Invalid Command");
-                }               
+                Console.WriteLine("File doesn't exists");
             }
-        }
+            catch (ArgumentException)
+            {
+                Console.WriteLine("Invalid Command");
+            }               
+        }        
 
         static void ReadCommand(PuppetMasterServices pcs, string[] words)
         {
@@ -100,10 +92,10 @@ namespace PuppetMaster
                     Task.Run(() => pcs.Crash(words[1], words[2]));
                     break;
                 case "Freeze":
-                    Task.Run(() => pcs.Freeze());
+                    Task.Run(() => pcs.Freeze(words[1], words[2]));
                     break;
                 case "Unfreeze":
-                    Task.Run(() => pcs.Unfreeze());
+                    Task.Run(() => pcs.Unfreeze(words[1], words[2]));
                     break;   
                 default:
                     ExecFile(pcs, words[0]);
