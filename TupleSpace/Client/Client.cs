@@ -58,42 +58,40 @@ namespace Client
             Console.WriteLine("Client\n");
 
             Exec(client);
+
+            Console.WriteLine("Script finished");
+
+            Console.ReadLine();
+            while (true) ;
         }
 
         private static void Exec(ClientObj client)
         {
-            string input;
-            bool go = true;
             string line;
-            while (go)
-            {                
-
-                input = Console.ReadLine();
-                try
+            //input = Console.ReadLine();
+            try
+            {
+                //System.IO.StreamReader file = new System.IO.StreamReader(input);
+                while ((line = Console.ReadLine()) != null)
                 {
-                    //System.IO.StreamReader file = new System.IO.StreamReader(input);
-                    while ((line = Console.ReadLine()) != null)
+                    //System.Console.WriteLine(line);
+                    string[] words = line.Split(' ');
+                    switch (words[0])
                     {
-                        //System.Console.WriteLine(line);
-                        string[] words = line.Split(' ');
-                        switch (words[0])
-                        {
-                            case "begin-repeat":
-                                BeginRepeat(client, System.Convert.ToInt32(words[1]));
-                                break;
-                            case "exit":
-                            case "Exit":
-                                go = false;
-                                break;
-                            default:
-                                ReadCommand(client, words[0], words[1]);
-                                break;
-                        }
+                        case "begin-repeat":
+                            BeginRepeat(client, System.Convert.ToInt32(words[1]));
+                            break;
+                        case "exit":
+                        case "Exit":
+                            break;
+                        default:
+                            ReadCommand(client, words[0], words[1]);
+                            break;
                     }
-                } catch(FileNotFoundException)
-                {
-                    Console.WriteLine("File doesn't exists");
                 }
+            } catch(FileNotFoundException)
+            {
+                Console.WriteLine("File doesn't exists");
             }
         }
 

@@ -50,11 +50,12 @@ namespace Server
             {
                 tuples.Add(tuple);
             }            
-            Console.WriteLine("funciona");
+            Console.WriteLine("Add");
         }
 
         public List<string> Read(List<string> tuple)
-        {            
+        {
+            Console.WriteLine("Read");
             int aux;
             foreach (List<string> tup in tuples)
             {
@@ -96,7 +97,8 @@ namespace Server
         }
 
         public List<string> Take(List<string> tuple)
-        {            
+        {
+            Console.WriteLine("Take");
             List<string> returnValue = Read(tuple);
             lock (_lock)
             {

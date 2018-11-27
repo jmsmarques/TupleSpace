@@ -17,7 +17,7 @@ namespace PuppetMaster
             ChannelServices.RegisterChannel(channel, false);
 
 
-            PcsService mo = new PcsService(args[0], args[1]); //needs to be fixed
+            PcsService mo = new PcsService(args[0], args[1], args[2]); //needs to be fixed
 
 
             RemotingServices.Marshal(mo,"PcsService",

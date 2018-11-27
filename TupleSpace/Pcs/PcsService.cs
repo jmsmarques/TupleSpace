@@ -13,14 +13,16 @@ namespace PuppetMaster
 
         private string location;
         private string type;
+        private string serverLoc;
 
         public string Location { get { return this.location; } }
 
-        public PcsService(string location, string type)
+        public PcsService(string location, string type, string serverLoc)
         {
             this.location = location;
             processes = new List<string[]>();
             this.type = type;
+            this.serverLoc = serverLoc;
         }
 
         public string StartServer(string serverID, string url, int minDelay, int maxDelay)
@@ -59,8 +61,8 @@ namespace PuppetMaster
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = true;
             startInfo.FileName = "Client.exe";
-            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            startInfo.Arguments = "localhost:9000 " + type + " < " + scriptFile;
+            startInfo.WindowStyle = ProcessWindowStyle.Normal;
+            startInfo.Arguments = serverLoc + " " + type + " < " + scriptFile;
 
             try
             {
@@ -87,6 +89,7 @@ namespace PuppetMaster
                 if (url.Equals(loc[0]))
                 {
                     Process.GetProcessById(System.Convert.ToInt32(loc[1])).Kill();
+                    processes.Remove(loc);
                     break;
                 }
             }

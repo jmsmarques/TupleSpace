@@ -89,7 +89,7 @@ namespace PuppetMaster
                     Thread.Sleep(System.Convert.ToInt32(words[1]));
                     break;
                 case "Crash":
-                    Task.Run(() => pcs.Crash(words[1], words[2]));
+                    Task.Run(() => pcs.Crash(words[1]));
                     break;
                 case "Freeze":
                     Task.Run(() => pcs.Freeze(words[1], words[2]));
