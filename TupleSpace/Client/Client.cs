@@ -69,11 +69,9 @@ namespace Client
 
         private static void Exec(ClientObj client)
         {
-            string line;
-            //input = Console.ReadLine();
+            string line;            
             try
             {
-                //System.IO.StreamReader file = new System.IO.StreamReader(input);
                 while ((line = Console.ReadLine()) != null)
                 {
                     System.Console.WriteLine(line);
@@ -100,7 +98,6 @@ namespace Client
         private static void ExecPuppet(ClientObj client, string input)
         {
             string line;
-            //input = Console.ReadLine();
             try
             {
                 System.IO.StreamReader file = new System.IO.StreamReader(input);
