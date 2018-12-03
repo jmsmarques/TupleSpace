@@ -57,12 +57,14 @@ namespace Client
 
             Console.WriteLine("Client\n");
 
-            Exec(client);
+            if (args.Length < 3)
+                Exec(client);
+            else
+                ExecPuppet(client, args[2]);
 
             Console.WriteLine("Script finished");
 
             Console.ReadLine();
-            while (true) ;
         }
 
         private static void Exec(ClientObj client)
@@ -74,7 +76,7 @@ namespace Client
                 //System.IO.StreamReader file = new System.IO.StreamReader(input);
                 while ((line = Console.ReadLine()) != null)
                 {
-                    //System.Console.WriteLine(line);
+                    System.Console.WriteLine(line);
                     string[] words = line.Split(' ');
                     switch (words[0])
                     {
@@ -90,6 +92,37 @@ namespace Client
                     }
                 }
             } catch(FileNotFoundException)
+            {
+                Console.WriteLine("File doesn't exists");
+            }
+        }
+
+        private static void ExecPuppet(ClientObj client, string input)
+        {
+            string line;
+            //input = Console.ReadLine();
+            try
+            {
+                System.IO.StreamReader file = new System.IO.StreamReader(input);
+                while ((line = file.ReadLine()) != null)
+                {
+                    System.Console.WriteLine(line);
+                    string[] words = line.Split(' ');
+                    switch (words[0])
+                    {
+                        case "begin-repeat":
+                            BeginRepeat(client, System.Convert.ToInt32(words[1]));
+                            break;
+                        case "exit":
+                        case "Exit":
+                            break;
+                        default:
+                            ReadCommand(client, words[0], words[1]);
+                            break;
+                    }
+                }
+            }
+            catch (FileNotFoundException)
             {
                 Console.WriteLine("File doesn't exists");
             }

@@ -35,12 +35,14 @@ namespace PuppetMaster
             objName = words[3];
             port = words1[1];
 
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.CreateNoWindow = true;
-            startInfo.UseShellExecute = true;
-            startInfo.FileName = "..\\..\\..\\Server\\bin\\Debug\\Server.exe";
-            startInfo.WindowStyle = ProcessWindowStyle.Normal;
-            startInfo.Arguments = port + " " + type + " null " + minDelay + " " + maxDelay + " " + objName;
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                CreateNoWindow = true,
+                UseShellExecute = true,
+                FileName = "..\\..\\..\\Server\\bin\\Debug\\Server.exe",
+                WindowStyle = ProcessWindowStyle.Normal,
+                Arguments = port + " " + type + " null " + minDelay + " " + maxDelay + " " + objName
+            };
             try
             {
                 StartProcess(serverID, startInfo);
@@ -56,13 +58,14 @@ namespace PuppetMaster
 
         public string StartClient(string serverID, string url, string scriptFile)
         {
-            // Use ProcessStartInfo class
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.CreateNoWindow = true;
-            startInfo.UseShellExecute = true;
-            startInfo.FileName = "..\\..\\..\\Client\\bin\\Debug\\Client.exe";
-            startInfo.WindowStyle = ProcessWindowStyle.Normal;
-            startInfo.Arguments = serverLoc + " " + type + " < " + scriptFile;
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                CreateNoWindow = true,
+                UseShellExecute = true,
+                FileName = "..\\..\\..\\Client\\bin\\Debug\\Client.exe",
+                WindowStyle = ProcessWindowStyle.Normal,
+                Arguments = serverLoc + " " + type + " " + scriptFile
+            };
 
             try
             {
