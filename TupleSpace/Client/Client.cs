@@ -68,20 +68,15 @@ namespace Client
         private static void Exec(ClientObj client)
         {
             string line;
-            //input = Console.ReadLine();
+            String input = Console.ReadLine();
             try
             {
-                //System.IO.StreamReader file = new System.IO.StreamReader(input);
-                while ((line = Console.ReadLine()) != null)
-                {
-<<<<<<< HEAD
-                    System.IO.StreamReader file = new System.IO.StreamReader("../../../" + input);
-                    while ((line = file.ReadLine()) != null)
-=======
+                System.IO.StreamReader file = new System.IO.StreamReader("../../../" + input);
+                while ((line = file.ReadLine()) != null)
+                {             
                     //System.Console.WriteLine(line);
                     string[] words = line.Split(' ');
                     switch (words[0])
->>>>>>> b397ad04eef0c3914eb8b488e11af7f6f8479cd5
                     {
                         case "begin-repeat":
                             BeginRepeat(client, System.Convert.ToInt32(words[1]));
@@ -94,6 +89,7 @@ namespace Client
                             break;
                     }
                 }
+             
             } catch(FileNotFoundException)
             {
                 Console.WriteLine("File doesn't exists");
