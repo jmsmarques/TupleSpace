@@ -37,9 +37,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PuppetMaster.cs" />
+    <Compile Include="PuppetMasterServices.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="System" />
     <Reference Include="System.Runtime.Remoting" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Pcs\Pcs.csproj">
+      <Project>{69c33968-341f-4dc4-907e-35ff47bba96c}</Project>
+      <Name>Pcs</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

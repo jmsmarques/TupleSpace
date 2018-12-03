@@ -17,14 +17,27 @@ namespace Server
         static void Main(string[] args)
         {
             string[] conf;
+            string myRemoteObject = null;
             string serverLoc = null;
+            int maxDelay = 0, minDelay = 0;
+            if(args.Length == 0) //le do ficheiro
+            {
+                conf = ReadConfFile(); //pos 0 is port -- pos 1 is type
+            }
+            else //le dos argumentos
+            {
+                conf = ReadArgs(args);                
+                minDelay = System.Convert.ToInt32(conf[4]);
+                maxDelay = System.Convert.ToInt32(conf[5]);
+                myRemoteObject = conf[6];
+            }
+            
 
-            conf = ReadConfFile(); //pos 0 is port -- pos 1 is type
             if (!conf[2].Equals("null"))
             {
-                serverLoc = "tcp://" + conf[2] + ":" + conf[3] + "/MyRemoteObject";
+                serverLoc = "tcp://" + conf[2] + ":" + conf[3] + "/" + myRemoteObject;
             }
-            Console.WriteLine("Port:{0}\nType:{1}", conf[0], conf[1]);
+            Console.WriteLine("Port:{0}\nType:{1}\nObj:{2}", conf[0], conf[1], myRemoteObject);
 
             BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
             provider.TypeFilterLevel = TypeFilterLevel.Full;
@@ -34,14 +47,14 @@ namespace Server
                         
             ChannelServices.RegisterChannel(channel, true);
 
-            ServerService mo = new ServerService(System.Convert.ToInt32(conf[1]));
+            ServerService mo = new ServerService(System.Convert.ToInt32(conf[1]), minDelay, maxDelay);
 
             if(serverLoc != null)
             {
                 mo.Init(serverLoc);
             }
 
-            RemotingServices.Marshal(mo,"MyRemoteObject",
+            RemotingServices.Marshal(mo,myRemoteObject,
             typeof(ServerService));
 
             System.Console.WriteLine("<enter> para sair...");
@@ -88,6 +101,40 @@ namespace Server
                 }
             }
 
+            return result;
+        }
+
+        private static string[] ReadArgs(string[] args)
+        {
+            string[] result = new string[7];
+
+            result[0] = args[0];
+           
+            if (args[1].Equals("SMR"))
+            {
+                result[1] = "1";
+            }
+            else if (args[1].Equals("XL"))
+            {
+                result[1] = "2";
+            }
+
+            result[2] = args[2];
+
+            if (result[2].Equals("null"))
+            {
+                result[3] = null;
+                result[4] = args[3];
+                result[5] = args[4];
+                result[6] = args[5];
+            }
+            else
+            {
+                result[3] = args[3];
+                result[4] = args[4];
+                result[5] = args[5];
+                result[6] = args[6];
+            }      
             return result;
         }
     }

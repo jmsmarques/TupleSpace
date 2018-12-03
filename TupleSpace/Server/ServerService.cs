@@ -16,13 +16,17 @@ namespace Server
         private static object _lock = new object();
         private static int frozen_req= 0;
         private static int test= 2;
+        private int maxDelay, minDelay;
 
-        public ServerService(int comType)
+
+        public ServerService(int comType, int min, int max)
         {            
             view = new List<IServerService>();            
             view.Add(this);
             tuples = new List<List<string>>();
             this.comType = comType;
+            maxDelay = max;
+            minDelay = min;
         }
 
         //server functions
@@ -57,12 +61,11 @@ namespace Server
                     Monitor.PulseAll(this);
                 }
             }
-            
-            Console.WriteLine("funciona");
         }
 
         public List<string> Read(List<string> tuple)
         {
+
             List<string> returnValue = null;
             returnValue = ReadAux(tuple);
             while(returnValue == null)
@@ -118,12 +121,13 @@ namespace Server
                         if (aux == tuple.Count) { return tup; }
                     }
                 }
-                return null;
             }
+            return null;         
         }
 
         public List<string> Take(List<string> tuple)
-        {            
+        {
+            Console.WriteLine("Take");
             List<string> returnValue = Read(tuple);
             lock (_lock)
             {

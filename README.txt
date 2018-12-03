@@ -16,6 +16,6 @@ After the configuration is finished
 1.Run at least 1 server
 2.Run more servers or client
 
-Carefull with the cofigurations
+Careful with the cofigurations
 
 When the client starts it expects a name of a file with inputs

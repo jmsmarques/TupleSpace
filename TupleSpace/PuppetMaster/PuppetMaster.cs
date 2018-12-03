@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
+using System.Diagnostics;
+using System.IO;
+using System.Threading;
 
 namespace PuppetMaster
 {
@@ -13,52 +16,91 @@ namespace PuppetMaster
     {
         static void Main(string[] args)
         {
+            //port 10001 reserved
+            string file;
 
-        	//Teste
-        	
-            Console.Write(".");
-            System.Threading.Thread.Sleep(1000);
-            Console.Write(".");
-            System.Threading.Thread.Sleep(1000);
-            Console.Write(".");
-            System.Threading.Thread.Sleep(1000);
-            Console.WriteLine();
-            Console.WriteLine("Client Console\n\n");
-            string input;
-            while (true)
+            if (args.Length == 0)
             {
-                Console.Write("PUPPET>");
-                input = Console.ReadLine();
-                string[] words = input.Split(' ');
-                switch (words[0])
+                Console.WriteLine("Configuration File");
+                file = Console.ReadLine();
+            }
+            else
+            {
+                file = args[0];
+            }
+            
+            PuppetMasterServices puppetMaster = new PuppetMasterServices(file);
+
+            Exec(puppetMaster);
+        }
+
+        static void Exec(PuppetMasterServices pcs)
+        {
+            string line;
+            while ((line = Console.ReadLine()) != null)
+            {
+                //System.Console.WriteLine(line);
+                string[] words = line.Split(' ');
+                ReadCommand(pcs, words);
+            }            
+        }
+
+        static void ExecFile(PuppetMasterServices pcs, string input)
+        {
+            string line;   
+            try
+            {
+                System.IO.StreamReader file = new System.IO.StreamReader(input);
+                while ((line = file.ReadLine()) != null)
                 {
-                    case "add":
-                        Console.WriteLine("add");
-                        break;
-                    case "read":
-                        Console.WriteLine("read");
-                        break;
-                    case "take":
-                        Console.WriteLine("take");
-                        break;
-                    case "wait":
-                        Console.WriteLine("wait " + words[1] + "ms");
-                        break;
-                    case "begin-repeat":
-                        Console.WriteLine("begin-repeat " + words[1] + " times ");
-                        break;
-                    case "end-repeat":
-                        Console.WriteLine("end-repeat");
-                        break;
-                    case "exit":
-                    case "Exit":
-                        Environment.Exit(1);
-                        break;
-                    default:
-                        Console.WriteLine("Command not recognized. Type \"help\" for more info ");
-                        break;
+                    //System.Console.WriteLine(line);
+                    string[] words = line.Split(' ');
+                    ReadCommand(pcs, words);
                 }
             }
+            catch (FileNotFoundException)
+            {
+                Console.WriteLine("File doesn't exists");
+            }
+            catch (ArgumentException)
+            {
+                Console.WriteLine("Invalid Command");
+            }               
+        }        
+
+        static void ReadCommand(PuppetMasterServices pcs, string[] words)
+        {
+            switch (words[0])
+            {
+                case "Server":
+                    Console.WriteLine("...");
+                    Task.Run(() => pcs.StartServer(words[1], words[2],
+                        System.Convert.ToInt32(words[3]), System.Convert.ToInt32(words[4])));
+                    break;
+                case "Client":
+                    Console.WriteLine("...");
+                    Task.Run(() => pcs.StartClient(words[1], words[2], words[3]));
+                    break;
+                case "Status":
+                    Console.WriteLine("...");
+                    Task.Run(() => pcs.PrintStatus());
+                    break;
+                case "Wait":
+                    Thread.Sleep(System.Convert.ToInt32(words[1]));
+                    break;
+                case "Crash":
+                    Task.Run(() => pcs.Crash(words[1]));
+                    break;
+                case "Freeze":
+                    Task.Run(() => pcs.Freeze(words[1], words[2]));
+                    break;
+                case "Unfreeze":
+                    Task.Run(() => pcs.Unfreeze(words[1], words[2]));
+                    break;   
+                default:
+                    ExecFile(pcs, words[0]);
+                    break;
+            }
         }
-    }
+    }        
 }

@@ -1,3 +1,2 @@
-Server:localhost
-Port:8086
+Server:localhost:8086
 Type:SMR
