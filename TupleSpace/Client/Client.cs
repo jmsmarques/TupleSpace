@@ -89,6 +89,7 @@ namespace Client
                             break;
                     }
                 }
+             
             } catch(FileNotFoundException)
             {
                 Console.WriteLine("File doesn't exists");

@@ -14,7 +14,10 @@ namespace Server
         private List<List<string>> tuples;  
         private readonly int comType; //1 for SMR 2 for XL
         private static object _lock = new object();
+        private static int frozen_req= 0;
+        private static int test= 2;
         private int maxDelay, minDelay;
+
 
         public ServerService(int comType, int min, int max)
         {            
@@ -49,51 +52,77 @@ namespace Server
             lock (_lock)
             {
                 tuples.Add(tuple);
-            }            
-            Console.WriteLine("Add");
+                test += 2;
+                Console.WriteLine(test);
+            }
+            if (frozen_req > 0)
+            {
+                lock (this){
+                    Monitor.PulseAll(this);
+                }
+            }
         }
 
         public List<string> Read(List<string> tuple)
         {
-            Console.WriteLine("Read");
-            int aux;
-            foreach (List<string> tup in tuples)
-            {
-                aux = 0;
-                if (tup.Count == tuple.Count)
-                {
-                    for (int i = 0; i < tuple.Count; i++)
-                    {
-                        if (tup[i][0] == '\"') //string
-                        {
-                            if (CmpString(tup[i], tuple[i]))
-                            {
-                                aux++;
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                        else //object
-                        {
-                            if (tuple[i].Equals("null") || tuple[i].Equals(tup[i])
-                                || CmpObjectType(tuple[i], tup[i]))
-                            {
-                                aux++;
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
 
+            List<string> returnValue = null;
+            returnValue = ReadAux(tuple);
+            while(returnValue == null)
+            {
+                Console.WriteLine("bloqueado");
+                frozen_req++;
+                lock(this){
+                    Monitor.Wait(this);
+                }
+                returnValue = ReadAux(tuple);
+                frozen_req--;
+            }
+           
+            return returnValue;
+        }
+        public List<string> ReadAux(List<string> tuple)
+        {
+            lock (_lock)
+            {
+                int aux;
+                foreach (List<string> tup in tuples)
+                {
+                    aux = 0;
+                    if (tup.Count == tuple.Count)
+                    {
+                        for (int i = 0; i < tuple.Count; i++)
+                        {
+                            if (tup[i][0] == '\"') //string
+                            {
+                                if (CmpString(tup[i], tuple[i]))
+                                {
+                                    aux++;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                            else //object
+                            {
+                                if (tuple[i].Equals("null") || tuple[i].Equals(tup[i])
+                                    || CmpObjectType(tuple[i], tup[i]))
+                                {
+                                    aux++;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+
+                        }
+                        if (aux == tuple.Count) { return tup; }
                     }
-                    if (aux == tuple.Count) { return tup; }
                 }
             }
-            return null;
-                 
+            return null;         
         }
 
         public List<string> Take(List<string> tuple)
