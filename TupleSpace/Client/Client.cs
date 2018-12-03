@@ -62,7 +62,7 @@ namespace Client
                 input = Console.ReadLine();
                 try
                 {
-                    System.IO.StreamReader file = new System.IO.StreamReader(input);
+                    System.IO.StreamReader file = new System.IO.StreamReader("../../../" + input);
                     while ((line = file.ReadLine()) != null)
                     {
                         //System.Console.WriteLine(line);
