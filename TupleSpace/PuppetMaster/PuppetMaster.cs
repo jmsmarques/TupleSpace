@@ -92,10 +92,10 @@ namespace PuppetMaster
                     Task.Run(() => pcs.Crash(words[1]));
                     break;
                 case "Freeze":
-                    Task.Run(() => pcs.Freeze(words[1], words[2]));
+                    Task.Run(() => pcs.Freeze(words[1]));
                     break;
                 case "Unfreeze":
-                    Task.Run(() => pcs.Unfreeze(words[1], words[2]));
+                    Task.Run(() => pcs.Unfreeze(words[1]));
                     break;   
                 default:
                     ExecFile(pcs, words[0]);

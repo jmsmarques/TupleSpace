@@ -18,9 +18,12 @@ namespace Server
         private static int frozen_req= 0;
         private static int test= 2;
         private int maxDelay, minDelay;
+
         //private Random rnd = new Random();
         public Estado state = Estado.LEADER;
         public bool leader = true;
+
+        private bool freeze;
 
         public string Loc { get { return loc; } }
 
@@ -35,6 +38,7 @@ namespace Server
             maxDelay = max;
             minDelay = min;
             this.loc = loc;
+            freeze = false;
         }
 
         //server functions
@@ -67,10 +71,18 @@ namespace Server
         //end of server functions
 
         //client functions
+        public void Freeze(bool value)
+        {
+            this.freeze = value;
+        }
+
         public void Add(List<string> tuple)
         {
+
             //Thread.Sleep(rnd.Next(minDelay, maxDelay));
             
+
+            while (freeze) ;
             lock (_lock)
             {
                 tuples.Add(tuple);
@@ -98,7 +110,11 @@ namespace Server
 
         public List<string> Read(List<string> tuple)
         {
+
             //Thread.Sleep(rnd.Next(minDelay,maxDelay));
+
+            while (freeze) ;
+
             List<string> returnValue = null;
             returnValue = ReadAux(tuple);
             while(returnValue == null)
@@ -161,6 +177,7 @@ namespace Server
         public List<string> Take(List<string> tuple)
         {
             Console.WriteLine("Take");
+            while (freeze) ;
             List<string> returnValue = Read(tuple);
             lock (_lock)
             {
@@ -206,9 +223,7 @@ namespace Server
                 PrintTuple(tuple);
             }
             Console.WriteLine("End of tuples");
-        }
-
-
+        }        
 
         private bool CmpString(string original, string toCompare) 
         {
