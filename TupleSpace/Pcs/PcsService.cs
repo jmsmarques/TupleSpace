@@ -126,30 +126,50 @@ namespace PuppetMaster
             return result;
         }
 
-        public string Freeze(string url)
+        public string Freeze(string serverId)
         {
-            foreach (string[] loc in processes)
+            string result = "Process Frozzen";
+            foreach (Object[] loc in processes)
             {
-                if (url.Equals(loc[0]))
+                if (serverId.Equals(loc[0]))
                 {
-                    //Process.GetProcessById(System.Convert.ToInt32(loc[1])).Kill();
+                    try
+                    {
+                        ((IServerService)loc[2]).Freeze(true);
+                    }
+                    catch (ArgumentException)
+                    {
+                        Console.WriteLine("Process already closed");
+                        result = "Process already closed";
+                        processes.Remove(loc);
+                    }
                     break;
                 }
             }
-            return "Process Frezeed";
+            return result;
         }
 
-        public string  Unfreeze(string url)
+        public string  Unfreeze(string serverId)
         {
-            foreach (string[] loc in processes)
+            string result = "Process Unfrozzen";
+            foreach (Object[] loc in processes)
             {
-                if (url.Equals(loc[0]))
+                if (serverId.Equals(loc[0]))
                 {
-                    //Process.GetProcessById(System.Convert.ToInt32(loc[1])).Kill();
+                    try
+                    {
+                        ((IServerService)loc[2]).Freeze(false);
+                    }
+                    catch (ArgumentException)
+                    {
+                        Console.WriteLine("Process already closed");
+                        result = "Process already closed";
+                        processes.Remove(loc);
+                    }
                     break;
                 }
             }
-            return "Process Resumed";
+            return result;
         }
 
         private bool StartProcess(string serverId, ProcessStartInfo startInfo, string url)

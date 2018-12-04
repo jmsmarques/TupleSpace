@@ -8,6 +8,8 @@ namespace ClientLibrary
 {
     public interface IServerService
     {
+        void Freeze(bool value);
+
         void Add(List<string> tuple);
 
         List<string> Read(List<string> tuple);

@@ -115,15 +115,17 @@ namespace PuppetMaster
                 Console.WriteLine(result);
         }
 
-        public void Freeze(string url, string serverId)
+        public void Freeze(string serverId)
         {
-            string result = null;            
+            string result = null;
+
+            string url = GetLocation(serverId);
 
             foreach (PcsService pc in Pcs)
             {
-                if (pc.Location.Equals("localhost:" + url))
+                if (pc.Location.Equals(url))
                 {
-                    result = pc.Crash(serverId);
+                    result = pc.Freeze(serverId);
                     break;
                 }
             }
@@ -133,14 +135,17 @@ namespace PuppetMaster
                 Console.WriteLine(result);
         }
 
-        public void Unfreeze(string url, string serverId)
+        public void Unfreeze(string serverId)
         {
-            string result = null;       
+            string result = null;
+
+            string url = GetLocation(serverId);
+
             foreach (PcsService pc in Pcs)
             {
-                if (pc.Location.Equals("localhost:" + url))
+                if (pc.Location.Equals(url))
                 {
-                    result = pc.Crash(serverId);
+                    result = pc.Unfreeze(serverId);
                     break;
                 }
             }
