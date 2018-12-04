@@ -28,7 +28,7 @@ namespace Client
                 aux = ReadArgs(args);
             }
 
-            string serverLoc = "tcp://" + aux[0] + "/MyRemoteObject";
+            string serverLoc = aux[0];
 
             if(aux[1].Equals("SMR"))
             {
@@ -54,7 +54,7 @@ namespace Client
                     serverLoc);
 
             ClientObj client = new ClientObj(obj.GetView(), comType);
-
+           
             Console.WriteLine("Client\n");
 
             if (args.Length < 3)

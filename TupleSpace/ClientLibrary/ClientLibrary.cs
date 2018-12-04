@@ -17,10 +17,7 @@ namespace ClientLibrary
         List<IServerService> GetView();
 
         void Wait(int x);
-    }
 
-    public interface ITeste
-    {
-        void PrintStatus();
-    }
+        void Status();
+    }  
 }

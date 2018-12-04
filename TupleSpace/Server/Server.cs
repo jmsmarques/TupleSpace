@@ -9,6 +9,7 @@ using System.Runtime.Remoting.Channels.Tcp;
 using System.Collections;
 using System.Runtime.Serialization.Formatters;
 using System.IO;
+using System.Threading;
 
 namespace Server
 {
@@ -47,7 +48,7 @@ namespace Server
                         
             ChannelServices.RegisterChannel(channel, true);
 
-            ServerService mo = new ServerService(System.Convert.ToInt32(conf[1]), minDelay, maxDelay);
+            ServerService mo = new ServerService(System.Convert.ToInt32(conf[1]), minDelay, maxDelay, serverLoc);
 
             if(serverLoc != null)
             {
@@ -57,7 +58,8 @@ namespace Server
             RemotingServices.Marshal(mo,myRemoteObject,
             typeof(ServerService));
 
-            System.Console.WriteLine("<enter> para sair...");
+            System.Console.WriteLine("<enter> para sair...");            
+
             System.Console.ReadLine();
         }
 

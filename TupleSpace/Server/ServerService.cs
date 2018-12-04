@@ -12,14 +12,16 @@ namespace Server
     {
         private List<IServerService> view;
         private List<List<string>> tuples;  
+        private string loc;
         private readonly int comType; //1 for SMR 2 for XL
         private static object _lock = new object();
         private static int frozen_req= 0;
         private static int test= 2;
         private int maxDelay, minDelay;
 
+        public string Loc { get { return loc; } }
 
-        public ServerService(int comType, int min, int max)
+        public ServerService(int comType, int min, int max, string loc)
         {            
             view = new List<IServerService>();            
             view.Add(this);
@@ -27,6 +29,7 @@ namespace Server
             this.comType = comType;
             maxDelay = max;
             minDelay = min;
+            this.loc = loc;
         }
 
         //server functions
@@ -147,6 +150,25 @@ namespace Server
         }
         //end of client functions
 
+        public void Status()
+        {
+            /*Console.WriteLine("View");
+            foreach(IServerService s in view)
+            {
+                Console.WriteLine(s.Loc);
+            }
+            Console.WriteLine("End of view");*/
+
+            Console.WriteLine("Tuples");
+            foreach(List<string> tuple in tuples)
+            {
+                PrintTuple(tuple);
+            }
+            Console.WriteLine("End of tuples");
+        }
+
+
+
         private bool CmpString(string original, string toCompare) 
         {
             original = original.Trim('\"');
@@ -191,6 +213,23 @@ namespace Server
                 return true;
             }
             return false;
+        }
+
+        private void PrintTuple(List<string> readTuple)
+        {
+            if (readTuple != null)
+            {
+                Console.Write("<");
+                foreach (string s in readTuple)
+                {
+                    Console.Write("{0}", s);
+                    if (!s.Equals(readTuple.Last()))
+                    {
+                        Console.Write(",");
+                    }
+                }
+                Console.WriteLine(">");
+            }
         }
     }
 }

@@ -20,7 +20,7 @@ namespace PuppetMaster
             string serverLoc;
 
             TcpChannel channel = new TcpChannel();
-            ChannelServices.RegisterChannel(channel, false);
+            ChannelServices.RegisterChannel(channel, true);
 
 
             using (StreamReader file = File.OpenText(confFile))

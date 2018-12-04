@@ -1,15 +1,17 @@
-﻿using System;
+﻿using ClientLibrary;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PuppetMaster
 {
     public class PcsService : MarshalByRefObject
     {
-        private List<string[]> processes;
+        private List<Object[]> processes;
 
         private string location;
         private string type;
@@ -20,7 +22,7 @@ namespace PuppetMaster
         public PcsService(string location, string type, string serverLoc)
         {
             this.location = location;
-            processes = new List<string[]>();
+            processes = new List<Object[]>();
             this.type = type;
             this.serverLoc = serverLoc;
         }
@@ -45,7 +47,8 @@ namespace PuppetMaster
             };
             try
             {
-                StartProcess(serverID, startInfo);
+                if (StartProcess(serverID, startInfo, url))
+                    return "Id already in use";
             }
             catch
             {
@@ -69,7 +72,8 @@ namespace PuppetMaster
 
             try
             {
-                StartProcess(serverID, startInfo);
+                if(StartProcess(serverID, startInfo, url))
+                    return "Id already in use";
             }
             catch
             {
@@ -82,21 +86,44 @@ namespace PuppetMaster
 
         public void PrintStatus()
         {
-            
+            foreach(Object[] obj in processes)
+            {
+                try
+                {
+                    if (obj[2] != null)
+                        ((IServerService)obj[2]).Status();
+                }
+                catch
+                {
+                    processes.Remove(obj);
+                }
+            }
         } 
 
         public string Crash(string url)
         {
-            foreach(string[] loc in processes)
+            string result = "Process Closed";
+            foreach(Object[] loc in processes)
             {
                 if (url.Equals(loc[0]))
                 {
-                    Process.GetProcessById(System.Convert.ToInt32(loc[1])).Kill();
-                    processes.Remove(loc);
+                    try
+                    {
+                        Process.GetProcessById(System.Convert.ToInt32(loc[1])).Kill();                        
+                    }
+                    catch(ArgumentException)
+                    {
+                        Console.WriteLine("Process already closed");
+                        result = "Process already closed";
+                    }
+                    finally
+                    {
+                        processes.Remove(loc);                        
+                    }
                     break;
                 }
             }
-            return "Process Closed";
+            return result;
         }
 
         public string Freeze(string url)
@@ -125,19 +152,47 @@ namespace PuppetMaster
             return "Process Resumed";
         }
 
-        private void StartProcess(string serverID, ProcessStartInfo startInfo)
+        private bool StartProcess(string serverId, ProcessStartInfo startInfo, string url)
         {
+            if (CheckServerId(serverId))
+            {
+                Console.WriteLine("Id already in use");
+                return true;
+            }
             using (Process exeProcess = Process.Start(startInfo))
             {
-                Console.WriteLine("{0} Comecou", serverID);
+                Console.WriteLine("{0} Comecou", serverId);
                 Console.WriteLine(exeProcess.Id);
-                string[] aux = new string[2];
-                aux[0] = serverID;
-                aux[1] = System.Convert.ToString(exeProcess.Id);
+                IServerService obj;
+                
+                try
+                {
+                    obj = (IServerService)Activator.GetObject(
+                        typeof(IServerService),
+                        url);
+                }
+                catch
+                {
+                    obj = null;
+                }
+                //obj.Status();
+                Object[] aux = new Object[3] { serverId, System.Convert.ToString(exeProcess.Id), obj };
                 processes.Add(aux);
+                             
                 exeProcess.WaitForExit();
-                Console.WriteLine("{0} Terminou ", serverID);
+                Console.WriteLine("{0} Terminou ", serverId);
             }
+            return false;
+        }
+
+        private bool CheckServerId(string serverId)
+        {
+            foreach(Object[] obj in processes)
+            {
+                if (obj[0].Equals(serverId))
+                    return true;
+            }
+            return false;
         }
     }
 }
