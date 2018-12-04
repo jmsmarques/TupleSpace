@@ -28,15 +28,15 @@ namespace Server
             else //le dos argumentos
             {
                 conf = ReadArgs(args);                
-                minDelay = System.Convert.ToInt32(conf[4]);
-                maxDelay = System.Convert.ToInt32(conf[5]);
-                myRemoteObject = conf[6];
+                minDelay = System.Convert.ToInt32(conf[3]);
+                maxDelay = System.Convert.ToInt32(conf[4]);
+                myRemoteObject = conf[5];
             }
             
 
             if (!conf[2].Equals("null"))
             {
-                serverLoc = "tcp://" + conf[2] + ":" + conf[3] + "/" + myRemoteObject;
+                serverLoc = conf[2];
             }
             Console.WriteLine("Port:{0}\nType:{1}\nObj:{2}", conf[0], conf[1], myRemoteObject);
 
@@ -119,24 +119,13 @@ namespace Server
             else if (args[1].Equals("XL"))
             {
                 result[1] = "2";
-            }
-
+            }            
+       
             result[2] = args[2];
-
-            if (result[2].Equals("null"))
-            {
-                result[3] = null;
-                result[4] = args[3];
-                result[5] = args[4];
-                result[6] = args[5];
-            }
-            else
-            {
-                result[3] = args[3];
-                result[4] = args[4];
-                result[5] = args[5];
-                result[6] = args[6];
-            }      
+            result[3] = args[3];
+            result[4] = args[4];
+            result[5] = args[5];
+                 
             return result;
         }
     }
