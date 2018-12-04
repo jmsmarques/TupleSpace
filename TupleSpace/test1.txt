@@ -1,1 +1,4 @@
-read <"a">
+begin-repeat 10
+add <"a">
+take <"a">
+end-repeat

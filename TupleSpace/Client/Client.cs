@@ -79,7 +79,7 @@ namespace Client
                     switch (words[0])
                     {
                         case "begin-repeat":
-                            BeginRepeat(client, System.Convert.ToInt32(words[1]));
+                            BeginRepeat(client, System.Convert.ToInt32(words[1]), null);
                             break;
                         case "exit":
                         case "Exit":
@@ -109,7 +109,7 @@ namespace Client
                     switch (words[0])
                     {
                         case "begin-repeat":
-                            BeginRepeat(client, System.Convert.ToInt32(words[1]));
+                            BeginRepeat(client, System.Convert.ToInt32(words[1]), file);
                             break;
                         case "exit":
                         case "Exit":
@@ -148,13 +148,18 @@ namespace Client
             }
         }
 
-        private static void BeginRepeat(ClientObj client, int loop)
+        private static void BeginRepeat(ClientObj client, int loop, System.IO.StreamReader file)
         {
             string line;
             bool end = false;
             List<string[]> commands = new List<string[]>();
 
-            while ((line = Console.ReadLine()) != null && !end)
+            if (file != null)
+                line = file.ReadLine();
+            else
+                line = Console.ReadLine();
+
+            while (line != null && !end)
             {
                 //System.Console.WriteLine(line);
                 string[] words = line.Split(' ');
@@ -168,6 +173,10 @@ namespace Client
                         //ReadCommand(client, words[0], words[1]);
                         break;
                 }
+                if (file != null)
+                    line = file.ReadLine();
+                else
+                    line = Console.ReadLine();
             }
 
             for(int i = 0; i < loop; i++)
