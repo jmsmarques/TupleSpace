@@ -18,8 +18,13 @@ namespace Server
         private static int frozen_req= 0;
         private static int test= 2;
         private int maxDelay, minDelay;
+        //private Random rnd = new Random();
+        public Estado state = Estado.LEADER;
+        public bool leader = true;
 
         public string Loc { get { return loc; } }
+
+        public enum Estado {LEADER,CANDIDATE,FOLLOWER};
 
         public ServerService(int comType, int min, int max, string loc)
         {            
@@ -35,28 +40,42 @@ namespace Server
         //server functions
         public void Init(string serverLoc)
         {
+            leader = false;
+            state = Estado.FOLLOWER;
             ServerService obj = (ServerService)Activator.GetObject(
                     typeof(ServerService),
                     serverLoc);
 
-            view = obj.GetServerView(this);
+            obj.GetServerView(this);
+
         }
 
-        public List<IServerService> GetServerView(ServerService newServer)
+        public void GetServerView(ServerService newServer)
         {
             view.Add(newServer);
-            return view;
+            foreach (ServerService serv in view)
+            {
+                serv.setServerView(view);
+                Console.WriteLine("View sent");
+            }
+        }
+        public void setServerView(List<IServerService> newView)
+        {
+            view = newView;
+            Console.WriteLine(view.Count);
         }
         //end of server functions
 
         //client functions
         public void Add(List<string> tuple)
         {
+            //Thread.Sleep(rnd.Next(minDelay, maxDelay));
+            
             lock (_lock)
             {
                 tuples.Add(tuple);
-                test += 2;
-                Console.WriteLine(test);
+                //test += 2;
+                //Console.WriteLine(test);
             }
             if (frozen_req > 0)
             {
@@ -64,11 +83,22 @@ namespace Server
                     Monitor.PulseAll(this);
                 }
             }
+            if (leader)
+            {
+                foreach (ServerService serv in view)
+                {
+                    if (!leader)
+                    {
+                        serv.Add(tuple);
+                    }
+                }
+            }
+            Status();
         }
 
         public List<string> Read(List<string> tuple)
         {
-
+            //Thread.Sleep(rnd.Next(minDelay,maxDelay));
             List<string> returnValue = null;
             returnValue = ReadAux(tuple);
             while(returnValue == null)
@@ -135,7 +165,18 @@ namespace Server
             lock (_lock)
             {
                 tuples.Remove(returnValue);
-            }           
+            }
+            if (leader)
+            {
+                foreach (ServerService serv in view)
+                {
+                    if (!leader)
+                    {
+                        serv.Take(tuple);
+                    }
+                }
+            }
+            Status();
             return returnValue;
         }
 
