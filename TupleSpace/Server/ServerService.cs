@@ -193,7 +193,7 @@ namespace Server
                     }
                 }
             }
-            Status();
+            //Status();
             return returnValue;
         }
 
