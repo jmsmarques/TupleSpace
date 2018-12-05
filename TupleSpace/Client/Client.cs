@@ -54,7 +54,7 @@ namespace Client
                     typeof(IServerService),
                     serverLoc);
 
-            ClientObj client = new ClientObj(obj.GetView(), comType);
+            ClientObj client = new ClientObj(obj.GetView(), comType, args[3]);
            
             Console.WriteLine("Client\n");
 

@@ -11,13 +11,17 @@ namespace Server
     class ServerService : MarshalByRefObject, IServerService
     {
         private List<IServerService> view;
-        private List<List<string>> tuples;  
+        private List<List<string>> tuples;
+        private List<Object[]> holdBackQueue;
+        private List<Action> deliverQueue;
+        private int p, a;
         private string loc;
         private readonly int comType; //1 for SMR 2 for XL
         private static object _lock = new object();
         private static int frozen_req= 0;
         private static int test= 2;
         private int maxDelay, minDelay;
+        private string id;
 
         //private Random rnd = new Random();
         public Estado state = Estado.LEADER;
@@ -29,7 +33,7 @@ namespace Server
 
         public enum Estado {LEADER,CANDIDATE,FOLLOWER};
 
-        public ServerService(int comType, int min, int max, string loc)
+        public ServerService(int comType, int min, int max, string loc, string id)
         {            
             view = new List<IServerService>();            
             view.Add(this);
@@ -39,6 +43,14 @@ namespace Server
             minDelay = min;
             this.loc = loc;
             freeze = false;
+            this.id = id;
+
+            if(comType == 2)
+            {
+                holdBackQueue = new List<Object[]>();
+                deliverQueue = new List<Action>();
+                p = a = 0;
+            }
         }
 
         //server functions
@@ -76,6 +88,34 @@ namespace Server
             this.freeze = value;
         }
 
+        public int XlRequest(List<string> tuple, string id, string req)
+        {            
+            p = Math.Max(p , a) + 1;
+            AddToHoldQueue(id, p, req, tuple);
+
+            return p;
+        }
+
+        public void XlConfirmation(string id, int nr)
+        {            
+            if(a != nr)
+            {
+                a = Math.Max(nr, a);
+            }
+            CheckChange(id, nr);
+            while((bool)holdBackQueue[0][3])
+            {
+                deliverQueue.Add((Action)holdBackQueue[0][0]);
+                holdBackQueue.Remove(holdBackQueue[0]);
+            }
+
+            foreach(Action func in deliverQueue)
+            {
+                func();
+            }
+        }
+
+
         public void Add(List<string> tuple)
         {
 
@@ -105,7 +145,6 @@ namespace Server
                     }
                 }
             }
-            Status();
         }
 
         public List<string> Read(List<string> tuple)
@@ -199,11 +238,6 @@ namespace Server
         {
             return view;     
         }
-
-        public void Wait(int x)
-        {
-        
-        }
         //end of client functions
 
         public void Status()
@@ -284,6 +318,79 @@ namespace Server
                 }
                 Console.WriteLine(">");
             }
+        }
+
+        private void AddToHoldQueue(string id, int nr, string req, List<string> tuple)
+        {
+            Object[] queue = new Object[4];
+            Action a;
+            queue[1] = nr;
+            queue[2] = id;
+            queue[3] = false;
+            if(req.Equals("Add"))
+            {
+                a = (() => { this.Add(tuple); });
+                queue[0] = a;
+            }
+            else if(req.Equals("Read"))
+            {
+                a = (() => { this.Read(tuple); });
+                queue[0] = a;
+            }
+            else if(req.Equals("Take"))
+            {
+                a = (() => { this.Take(tuple); });
+                queue[0] = a;
+            }
+
+            CheckPosition(nr, queue);
+            
+        }
+
+        private void CheckPosition(int nr, Object[] queue)
+        {
+            int aux = 0;
+            foreach (Object[] obj in holdBackQueue)
+            {
+                if ((int)obj[1] < nr)
+                {
+                    holdBackQueue.Insert(aux, queue);
+                    break;
+                }
+                /*else if((int)obj[1] == nr)
+                {
+                    if(((string)obj[2]). > queue[2]) //compares id for tiebreaker
+                    {
+
+                    }                    
+                }*/
+                aux++;
+            }
+
+            if (aux == holdBackQueue.Count)
+            {
+                holdBackQueue.Add(queue);
+            }
+        }
+
+        private void CheckChange(string id, int nr)
+        {
+            Object[] aux = null;
+            foreach(Object[] obj in holdBackQueue)
+            {
+                if(((string)obj[2]).Equals(id))
+                {
+                    if((int)obj[1] != nr)
+                    {
+                        aux = obj;
+                        aux[3] = true;
+                        holdBackQueue.Remove(obj);
+                    }
+                    break;
+                }
+            }
+            if(aux != null)
+                CheckPosition(nr, aux);
         }
     }
 }

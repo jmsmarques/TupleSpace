@@ -43,7 +43,7 @@ namespace PuppetMaster
                 UseShellExecute = true,
                 FileName = "..\\..\\..\\Server\\bin\\Debug\\Server.exe",
                 WindowStyle = ProcessWindowStyle.Normal,
-                Arguments = port + " " + type + " null " + minDelay + " " + maxDelay + " " + objName
+                Arguments = port + " " + type + " null " + minDelay + " " + maxDelay + " " + objName + " " + serverID
             };
             try
             {
@@ -67,7 +67,7 @@ namespace PuppetMaster
                 UseShellExecute = true,
                 FileName = "..\\..\\..\\Client\\bin\\Debug\\Client.exe",
                 WindowStyle = ProcessWindowStyle.Normal,
-                Arguments = serverLoc + " " + type + " " + scriptFile
+                Arguments = serverLoc + " " + type + " " + scriptFile + " " + serverID
             };
 
             try

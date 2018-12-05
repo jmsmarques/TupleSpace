@@ -1,4 +1,6 @@
 begin-repeat 10
 add <"a">
-take <"a">
+add <"b">
+read <"a">
+read <"*">
 end-repeat

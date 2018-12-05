@@ -12,12 +12,43 @@ namespace Client
     {
         private List<IServerService> view;
         private readonly int comType; //1 for SMR 2 for XL
+        private string id;
 
-        public ClientObj(List<IServerService> view, int type)
+        public ClientObj(List<IServerService> view, int type, string id)
         {
             this.view = view;
             comType = type;
+            this.id = id;
         }
+
+        public void XlRequest(string req, List<string> tuple)
+        {
+            Task[] tasks = new Task[view.Count];
+            int[] answers = new int[view.Count];
+            int i = 0;
+            foreach (IServerService s in view)
+            {                
+                Task t = Task.Run(() =>  answers[i] = s.XlRequest(tuple, id, req));
+                tasks[i] = t;
+            }
+
+            Task.WaitAll(tasks);
+
+            int max = 0;
+            for (int n = 0; n < answers.Length; n++)
+            {
+                if (answers[n] > max)
+                    max = answers[n];
+            }
+
+            i = 0;
+            foreach(IServerService s in view)
+            {
+                Task t = Task.Run(() => s.XlConfirmation(id, max));
+                tasks[i] = t;
+            }
+            Task.WaitAll(tasks);
+        } 
 
         public void Add(String tuple)
         {
@@ -32,7 +63,7 @@ namespace Client
 
             if (comType == 2)
             {
-                Task[] tasks = new Task[view.Count];
+                /*Task[] tasks = new Task[view.Count];
                 int i = 0;
                 foreach (IServerService server in view)
                 {
@@ -40,7 +71,9 @@ namespace Client
                     tasks[i] = t;
                     i++;
                 }
-                Task.WaitAll(tasks);
+                Task.WaitAll(tasks);*/
+
+                XlRequest("Add", addTuple);
             }
             else if (comType == 1)
             {
@@ -96,7 +129,7 @@ namespace Client
             
             else if(comType == 2)
             {
-                Task[] tasks = new Task[view.Count];
+                /*Task[] tasks = new Task[view.Count];
                 int i = 0;
                 foreach (IServerService server in view)
                 {
@@ -104,7 +137,9 @@ namespace Client
                     tasks[i] = t;
                     i++;
                 }
-                Task.WaitAny(tasks);
+                Task.WaitAny(tasks);*/
+
+                XlRequest("Read", readTuple);
             }
             PrintTuple(readTuple);
         }

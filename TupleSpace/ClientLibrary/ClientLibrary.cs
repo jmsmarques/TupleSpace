@@ -10,6 +10,10 @@ namespace ClientLibrary
     {
         void Freeze(bool value);
 
+        int XlRequest(List<string> tuple, string id, string req);
+
+        void XlConfirmation(string id, int nr);
+
         void Add(List<string> tuple);
 
         List<string> Read(List<string> tuple);
@@ -17,8 +21,6 @@ namespace ClientLibrary
         List<string> Take(List<string> tuple);
 
         List<IServerService> GetView();
-
-        void Wait(int x);
 
         void Status();
     }  
