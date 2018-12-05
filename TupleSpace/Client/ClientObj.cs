@@ -30,39 +30,52 @@ namespace Client
                 view = view[0].GetView();
             }
 
-            Task[] tasks = new Task[view.Count];
-            int i = 0;
-            foreach (IServerService server in view)
+            if (comType == 2)
             {
-                Task t = Task.Run(() => server.Add(addTuple));
-                tasks[i] = t;
-                i++;
+                Task[] tasks = new Task[view.Count];
+                int i = 0;
+                foreach (IServerService server in view)
+                {
+                    Task t = Task.Run(() => server.Add(addTuple));
+                    tasks[i] = t;
+                    i++;
+                }
+                Task.WaitAll(tasks);
             }
-            Task.WaitAll(tasks);
+            else if (comType == 1)
+            {
+                view[0].Add(addTuple);  
+            }            
         }
 
         public void Take(String tuple)
         {
             List<string> takeTuple;
-            List<string> return_value = null;
 
             takeTuple = TransformToTuple(tuple);
-
             if (CompareView())
             {
                 view = view[0].GetView();
             }
-            Task[] tasks = new Task[view.Count];
-            int i = 0;
-            foreach (IServerService server in view)
+            if( comType == 1)
             {
-                Task t = Task.Run(() => return_value = server.Take(takeTuple));
-                tasks[i] = t;
-                i++;
+                takeTuple = view[0].Take(takeTuple);
             }
-            Task.WaitAll(tasks);
+            else if (comType == 2)
+            {
+                Task[] tasks = new Task[view.Count];
+                int i = 0;
+                foreach (IServerService server in view)
+                {
+                    Task t = Task.Run(() => takeTuple = server.Take(takeTuple));
+                    tasks[i] = t;
+                    i++;
+                }
+                Task.WaitAll(tasks);
+            }
+            
 
-            PrintTuple(return_value);
+            PrintTuple(takeTuple);
         }
 
         public void Read(String tuple)
@@ -76,16 +89,23 @@ namespace Client
                 view = view[0].GetView();
             }
 
-            Task[] tasks = new Task[view.Count];
-            int i = 0;
-            foreach (IServerService server in view)
+            if (comType == 1)
             {
-                Task t = Task.Run(() => readTuple = server.Read(readTuple));
-                tasks[i] = t;
-                i++;
+                view[0].Read(readTuple);
             }
-            Task.WaitAny(tasks);
-
+            
+            else if(comType == 2)
+            {
+                Task[] tasks = new Task[view.Count];
+                int i = 0;
+                foreach (IServerService server in view)
+                {
+                    Task t = Task.Run(() => readTuple = server.Read(readTuple));
+                    tasks[i] = t;
+                    i++;
+                }
+                Task.WaitAny(tasks);
+            }
             PrintTuple(readTuple);
         }
 
