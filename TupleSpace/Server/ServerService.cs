@@ -95,17 +95,22 @@ namespace Server
                     Monitor.PulseAll(this);
                 }
             }
-            if (leader)
+            if(comType == 1 && leader)
             {
-                foreach (ServerService serv in view)
-                {
-                    if (!leader)
-                    {
-                        serv.Add(tuple);
-                    }
-                }
+                ReplicateAdd(tuple);
             }
             Status();
+        }
+
+        public void ReplicateAdd(List<string> tuple)
+        {
+            foreach (ServerService serv in view)
+            {
+                if (!leader)
+                {
+                    serv.Add(tuple);
+                }
+            }           
         }
 
         public List<string> Read(List<string> tuple)
@@ -181,18 +186,23 @@ namespace Server
             {
                 tuples.Remove(returnValue);
             }
-            if (leader)
+            if(comType == 1 && leader)
             {
-                foreach (ServerService serv in view)
-                {
-                    if (!leader)
-                    {
-                        serv.Take(tuple);
-                    }
-                }
+                ReplicateTake(tuple);
             }
             //Status();
             return returnValue;
+        }
+
+        public void ReplicateTake(List<string> tuple)
+        {
+            foreach (ServerService serv in view)
+            {
+                if (!leader)
+                {
+                    serv.Take(tuple);
+                }
+            }
         }
 
         public List<IServerService> GetView()
