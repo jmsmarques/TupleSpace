@@ -13,11 +13,12 @@ namespace Server
         private List<IServerService> view;
         private List<List<string>> tuples;
         private List<Object[]> holdBackQueue;
-        private List<Action> deliverQueue;
+        private List<Object[]> deliverQueue;
         private int p, a;
         private string loc;
         private readonly int comType; //1 for SMR 2 for XL
         private static object _lock = new object();
+        private static object _lock1 = new object();
         private static int frozen_req= 0;
         private static int test= 2;
         private int maxDelay, minDelay;
@@ -48,7 +49,7 @@ namespace Server
             if(comType == 2)
             {
                 holdBackQueue = new List<Object[]>();
-                deliverQueue = new List<Action>();
+                deliverQueue = new List<Object[]>();
                 p = a = 0;
             }
         }
@@ -96,23 +97,41 @@ namespace Server
             return p;
         }
 
-        public void XlConfirmation(string id, int nr)
+        public List<string> XlConfirmation(string id, int nr)
         {            
             if(a != nr)
             {
                 a = Math.Max(nr, a);
             }
             CheckChange(id, nr);
-            while((bool)holdBackQueue[0][3])
+
+            while(true)
             {
-                deliverQueue.Add((Action)holdBackQueue[0][0]);
-                holdBackQueue.Remove(holdBackQueue[0]);
+                if ((bool)holdBackQueue[0][3] && id.Equals((string)holdBackQueue[0][2]))
+                {
+                    deliverQueue.Add(holdBackQueue[0]);
+                    holdBackQueue.Remove(holdBackQueue[0]);
+                    break;
+                }                
             }
 
-            foreach(Action func in deliverQueue)
-            {
-                func();
+            List<string> result = null;
+            lock(_lock1) {
+                if (((string)deliverQueue[0][0]).Equals("Add"))
+                {
+                    Add((List<string>)deliverQueue[0][4]);
+                }
+                else if (((string)deliverQueue[0][0]).Equals("Read"))
+                {
+                    result = Read((List<string>)deliverQueue[0][4]);
+                }
+                else if (((string)deliverQueue[0][0]).Equals("Take"))
+                {
+                    result = Take((List<string>)deliverQueue[0][4]);
+                }
+                deliverQueue.Remove(deliverQueue[0]);
             }
+            return result;
         }
 
 
@@ -322,12 +341,14 @@ namespace Server
 
         private void AddToHoldQueue(string id, int nr, string req, List<string> tuple)
         {
-            Object[] queue = new Object[4];
-            Action a;
+            Object[] queue = new Object[5];
+            //Action a;
+            queue[0] = req;
             queue[1] = nr;
             queue[2] = id;
             queue[3] = false;
-            if(req.Equals("Add"))
+            queue[4] = tuple;
+            /*if(req.Equals("Add"))
             {
                 a = (() => { this.Add(tuple); });
                 queue[0] = a;
@@ -341,7 +362,7 @@ namespace Server
             {
                 a = (() => { this.Take(tuple); });
                 queue[0] = a;
-            }
+            }*/
 
             CheckPosition(nr, queue);
             
@@ -380,12 +401,12 @@ namespace Server
             {
                 if(((string)obj[2]).Equals(id))
                 {
-                    if((int)obj[1] != nr)
+                    obj[3] = true;
+                    if ((int)obj[1] != nr)
                     {
-                        aux = obj;
-                        aux[3] = true;
+                        aux = obj;                        
                         holdBackQueue.Remove(obj);
-                    }
+                    }                    
                     break;
                 }
             }

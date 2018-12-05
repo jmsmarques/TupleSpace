@@ -86,7 +86,7 @@ namespace PuppetMaster
 
         public void PrintStatus()
         {
-            foreach(Object[] obj in processes)
+            foreach(Object[] obj in processes) //erro de concurrencia
             {
                 try
                 {

@@ -12,7 +12,7 @@ namespace ClientLibrary
 
         int XlRequest(List<string> tuple, string id, string req);
 
-        void XlConfirmation(string id, int nr);
+        List<string> XlConfirmation(string id, int nr);
 
         void Add(List<string> tuple);
 

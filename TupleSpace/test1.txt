@@ -1,6 +1,7 @@
-begin-repeat 10
 add <"a">
 add <"b">
+begin-repeat 10
+wait 500
 read <"a">
-read <"*">
+read <"b">
 end-repeat
