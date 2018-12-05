@@ -36,7 +36,8 @@ namespace Server
 
             if (!conf[2].Equals("null"))
             {
-                serverLoc = conf[2];
+                //serverLoc = conf[2];
+                serverLoc = System.Configuration.ConfigurationManager.AppSettings["server"];
             }
             Console.WriteLine("Port:{0}\nType:{1}\nObj:{2}", conf[0], conf[1], myRemoteObject);
 
@@ -57,6 +58,7 @@ namespace Server
 
             RemotingServices.Marshal(mo,myRemoteObject,
             typeof(ServerService));
+
             System.Console.WriteLine("<enter> para sair...");            
 
             System.Console.ReadLine();

@@ -191,10 +191,7 @@ namespace Server
                     }
                 }
             }
-            Status();
-            Console.WriteLine("--------------------");
-            PrintTuple(returnValue);
-            Console.WriteLine("--------------------");
+            //Status();
             return returnValue;
         }
 

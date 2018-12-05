@@ -44,6 +44,7 @@ namespace Client
                 comType = 0;
             }
 
+            serverLoc = System.Configuration.ConfigurationManager.AppSettings["server"];
             Console.WriteLine(serverLoc);
 
             TcpChannel channel = new TcpChannel();
