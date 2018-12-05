@@ -57,7 +57,6 @@ namespace Server
 
             RemotingServices.Marshal(mo,myRemoteObject,
             typeof(ServerService));
-            mo.Freeze(true);
             System.Console.WriteLine("<enter> para sair...");            
 
             System.Console.ReadLine();

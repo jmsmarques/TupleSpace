@@ -112,9 +112,7 @@ namespace Server
         {
 
             //Thread.Sleep(rnd.Next(minDelay,maxDelay));
-
             while (freeze) ;
-
             List<string> returnValue = null;
             returnValue = ReadAux(tuple);
             while(returnValue == null)
@@ -194,6 +192,9 @@ namespace Server
                 }
             }
             Status();
+            Console.WriteLine("--------------------");
+            PrintTuple(returnValue);
+            Console.WriteLine("--------------------");
             return returnValue;
         }
 

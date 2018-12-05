@@ -44,6 +44,7 @@ namespace Client
         public void Take(String tuple)
         {
             List<string> takeTuple;
+            List<string> return_value = null;
 
             takeTuple = TransformToTuple(tuple);
 
@@ -51,12 +52,17 @@ namespace Client
             {
                 view = view[0].GetView();
             }
+            Task[] tasks = new Task[view.Count];
+            int i = 0;
             foreach (IServerService server in view)
             {
-                takeTuple = server.Take(takeTuple);
+                Task t = Task.Run(() => return_value = server.Take(takeTuple));
+                tasks[i] = t;
+                i++;
             }
+            Task.WaitAll(tasks);
 
-            PrintTuple(takeTuple);
+            PrintTuple(return_value);
         }
 
         public void Read(String tuple)
