@@ -119,20 +119,22 @@ namespace Server
             }
 
             List<string> result = null;
-            lock(_lock1) {
-                if (((string)deliverQueue[0][0]).Equals("Add"))
-                {
-                    Add((List<string>)deliverQueue[0][4]);
+            if (id.Equals((string)deliverQueue[0][2])) {
+                lock (_lock1) {
+                    if (((string)deliverQueue[0][0]).Equals("Add"))
+                    {
+                        Add((List<string>)deliverQueue[0][4]);
+                    }
+                    else if (((string)deliverQueue[0][0]).Equals("Read"))
+                    {
+                        result = Read((List<string>)deliverQueue[0][4]);
+                    }
+                    else if (((string)deliverQueue[0][0]).Equals("Take"))
+                    {
+                        result = Take((List<string>)deliverQueue[0][4]);
+                    }
+                    deliverQueue.Remove(deliverQueue[0]);
                 }
-                else if (((string)deliverQueue[0][0]).Equals("Read"))
-                {
-                    result = Read((List<string>)deliverQueue[0][4]);
-                }
-                else if (((string)deliverQueue[0][0]).Equals("Take"))
-                {
-                    result = Take((List<string>)deliverQueue[0][4]);
-                }
-                deliverQueue.Remove(deliverQueue[0]);
             }
             return result;
         }
