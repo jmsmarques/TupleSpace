@@ -18,9 +18,9 @@ namespace Server
         private static int frozen_req= 0;
         private static int test= 2;
         private int maxDelay, minDelay;
-        private int currentSeqNum=0;
+        private int currentSeqNum = 0;
 
-        //private Random rnd = new Random();
+        private Random rnd = new Random();
         public Estado state = Estado.LEADER;
         public bool leader = true;
 
@@ -82,14 +82,15 @@ namespace Server
         public void Add(List<string> tuple)
         {  
 
-            //Thread.Sleep(rnd.Next(minDelay, maxDelay));
+            Thread.Sleep(rnd.Next(minDelay, maxDelay));
             
 
             while (freeze) ;
             if(comType == 1)
             {
+                Console.WriteLine("if add");   
                 //SMR
-                AddSMR(tuple,currentSeqNum);
+                AddSMR(tuple,currentSeqNum + 1);
             }
             else if(comType==2){
                 //XL
@@ -106,51 +107,47 @@ namespace Server
                     }
                 }
             }
-            
-            
-            
-            Status();
         }
 
-        public void AddSMR(List<string> tuple,int SeqNum){ 
-            while (freeze) ;  
-            while(true){
-            if(currentSeqNum+1==SeqNum){
-                IncSeqNum();
-                //Thread.Sleep(rnd.Next(minDelay, maxDelay));
-            
+        public void AddSMR(List<string> tuple, int SeqNum) {
+            while (true) {
+                if (currentSeqNum + 1 == SeqNum) {
+                    Console.WriteLine("if addSMR");
+                    IncSeqNum();
+                  
 
-                
-                if(leader)
-                {
-                    ReplicateAdd(tuple,currentSeqNum);
+                    if (leader)
+                    {
+                        ReplicateAdd(tuple, currentSeqNum);
+                    }
+                    lock (_lock)
+                    {
+                        tuples.Add(tuple);
+                        //test += 2;
+                        //Console.WriteLine(test);
+                    }
+                    if (frozen_req > 0)
+                    {
+                        lock (this) {
+                            Monitor.PulseAll(this);
+                        }
+                    }
+                    break;
                 }
-                lock (_lock)
-                {
-                    tuples.Add(tuple);
-                    //test += 2;
-                    //Console.WriteLine(test);
-                }
-              if (frozen_req > 0)
-                {
-                    lock (this){
-                        Monitor.PulseAll(this);
+                else{
+                    lock (this) {
+                        Console.WriteLine("RIP");
+                        Monitor.Wait(this);
                     }
                 }
-            
-            Status();
-            }else{
-                lock (this){
-                    Monitor.Wait(this);
-                }
+
             }
         }
-
         public void ReplicateAdd(List<string> tuple,int SeqNum)
         {
             foreach (ServerService serv in view)
             {
-                if (!leader)
+                if (!serv.leader)
                 {
                     serv.AddSMR(tuple,SeqNum);
                 }
@@ -160,7 +157,7 @@ namespace Server
         public List<string> Read(List<string> tuple)
         {
 
-            //Thread.Sleep(rnd.Next(minDelay,maxDelay));
+            Thread.Sleep(rnd.Next(minDelay,maxDelay));
             while (freeze) ;
             List<string> returnValue = null;
             returnValue = ReadAux(tuple);
@@ -223,29 +220,86 @@ namespace Server
 
         public List<string> Take(List<string> tuple)
         {
+            Thread.Sleep(rnd.Next(minDelay, maxDelay));
+            List<string> returnValue = null;
             Console.WriteLine("Take");
             while (freeze) ;
-            if(comType == 1 && leader)
+
+
+
+            if (comType == 1)
             {
-                ReplicateTake(tuple);
+                Console.WriteLine("if add");
+                //SMR
+                return TakeSMR(tuple, currentSeqNum + 1);
             }
-            List<string> returnValue = Read(tuple);
+
+            returnValue = ReadAux(tuple);
+            while (returnValue == null)
+            {
+                Console.WriteLine("bloqueado");
+                frozen_req++;
+                lock (this)
+                {
+                    Monitor.Wait(this);
+                }
+                returnValue = ReadAux(tuple);
+                frozen_req--;
+            }
             lock (_lock)
             {
                 tuples.Remove(returnValue);
             }
             
-            //Status();
             return returnValue;
+        }
+
+        public List<String> TakeSMR(List<string> tuple, int SeqNum)
+        {
+            List<string> returnValue = null;
+            while (true)
+            {
+                if (currentSeqNum + 1 == SeqNum)
+                {
+                    Console.WriteLine("if takeSMR");
+                    IncSeqNum();
+
+                    if (leader)
+                    {
+                        ReplicateTake(tuple);
+                    }
+                    returnValue = ReadAux(tuple);
+                    while (returnValue == null)
+                    {
+                        Console.WriteLine("bloqueado");
+                        frozen_req++;
+                        lock (this)
+                        {
+                            //IncSeqNum();
+                            Monitor.Wait(this);
+                        }
+                        returnValue = ReadAux(tuple);
+                        frozen_req--;
+                    }
+                    return returnValue;
+                }
+                else
+                {
+                    lock (this)
+                    {
+                        Monitor.Wait(this);
+                    }
+                }
+            }
         }
 
         public void ReplicateTake(List<string> tuple)
         {
             foreach (ServerService serv in view)
             {
-                if (!leader)
+                if (!serv.leader)
                 {
-                    serv.Take(tuple);
+                    serv.TakeSMR(tuple,currentSeqNum);
                 }
             }
         }
