@@ -18,6 +18,7 @@ namespace Server
         private static int frozen_req= 0;
         private static int test= 2;
         private int maxDelay, minDelay;
+        private int currentSeqNum=0;
 
         //private Random rnd = new Random();
         public Estado state = Estado.LEADER;
@@ -26,6 +27,8 @@ namespace Server
         private bool freeze;
 
         public string Loc { get { return loc; } }
+        public void IncSeqNum(){ currentSeqNum++;} 
+
 
         public enum Estado {LEADER,CANDIDATE,FOLLOWER};
 
@@ -77,38 +80,79 @@ namespace Server
         }
 
         public void Add(List<string> tuple)
-        {
+        {  
 
             //Thread.Sleep(rnd.Next(minDelay, maxDelay));
             
 
             while (freeze) ;
-            lock (_lock)
+            if(comType == 1)
             {
-                tuples.Add(tuple);
-                //test += 2;
-                //Console.WriteLine(test);
+                //SMR
+                AddSMR(tuple,currentSeqNum);
             }
-            if (frozen_req > 0)
-            {
-                lock (this){
-                    Monitor.PulseAll(this);
+            else if(comType==2){
+                //XL
+                lock (_lock)
+                    {
+                        tuples.Add(tuple);
+                        //test += 2;
+                        //Console.WriteLine(test);
+                }
+                if (frozen_req > 0)
+                {
+                    lock (this){
+                        Monitor.PulseAll(this);
+                    }
                 }
             }
-            if(comType == 1 && leader)
-            {
-                ReplicateAdd(tuple);
-            }
+            
+            
+            
             Status();
         }
 
-        public void ReplicateAdd(List<string> tuple)
+        public void AddSMR(List<string> tuple,int SeqNum){ 
+            while (freeze) ;  
+            while(true){
+            if(currentSeqNum+1==SeqNum){
+                IncSeqNum();
+                //Thread.Sleep(rnd.Next(minDelay, maxDelay));
+            
+
+                
+                if(leader)
+                {
+                    ReplicateAdd(tuple,currentSeqNum);
+                }
+                lock (_lock)
+                {
+                    tuples.Add(tuple);
+                    //test += 2;
+                    //Console.WriteLine(test);
+                }
+              if (frozen_req > 0)
+                {
+                    lock (this){
+                        Monitor.PulseAll(this);
+                    }
+                }
+            
+            Status();
+            }else{
+                lock (this){
+                    Monitor.Wait(this);
+                }
+            }
+        }
+
+        public void ReplicateAdd(List<string> tuple,int SeqNum)
         {
             foreach (ServerService serv in view)
             {
                 if (!leader)
                 {
-                    serv.Add(tuple);
+                    serv.AddSMR(tuple,SeqNum);
                 }
             }           
         }
@@ -181,15 +225,16 @@ namespace Server
         {
             Console.WriteLine("Take");
             while (freeze) ;
+            if(comType == 1 && leader)
+            {
+                ReplicateTake(tuple);
+            }
             List<string> returnValue = Read(tuple);
             lock (_lock)
             {
                 tuples.Remove(returnValue);
             }
-            if(comType == 1 && leader)
-            {
-                ReplicateTake(tuple);
-            }
+            
             //Status();
             return returnValue;
         }
