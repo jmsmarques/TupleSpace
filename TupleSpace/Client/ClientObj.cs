@@ -12,12 +12,57 @@ namespace Client
     {
         private List<IServerService> view;
         private readonly int comType; //1 for SMR 2 for XL
+        private string id;
 
-        public ClientObj(List<IServerService> view, int type)
+        public ClientObj(List<IServerService> view, int type, string id)
         {
             this.view = view;
             comType = type;
+            this.id = id;
         }
+
+        public void XlRequest(string req, List<string> tuple)
+        {
+            Task[] tasks = new Task[view.Count];
+            int[] answers = new int[view.Count];
+            int i = 0;
+            foreach (IServerService s in view)
+            {
+                Task t = Task.Run(() =>  answers[i] = s.XlRequest(tuple, id, req));
+                tasks[i] = t;
+                if(i < view.Count - 1)
+                    i++;
+            }
+
+            Task.WaitAll(tasks);
+
+            int max = 0;
+            for (int n = 0; n < answers.Length; n++)
+            {
+                if (answers[n] > max)
+                    max = answers[n];
+            }
+
+            i = 0;
+            List<string> result = null;
+            foreach(IServerService s in view)
+            {
+                Task t = Task.Run(() => result = s.XlConfirmation(id, max));
+                tasks[i] = t;
+                i++;
+            }
+            if(req.Equals("Take"))
+            {
+                Task.WaitAll(tasks);
+                PrintTuple(result);
+            }
+            else if (req.Equals("Read"))
+            {
+                Task.WaitAny(tasks);
+                PrintTuple(result);
+            }
+            
+        } 
 
         public void Add(String tuple)
         {
@@ -32,7 +77,7 @@ namespace Client
 
             if (comType == 2)
             {
-                Task[] tasks = new Task[view.Count];
+                /*Task[] tasks = new Task[view.Count];
                 int i = 0;
                 foreach (IServerService server in view)
                 {
@@ -40,7 +85,9 @@ namespace Client
                     tasks[i] = t;
                     i++;
                 }
-                Task.WaitAll(tasks);
+                Task.WaitAll(tasks);*/
+
+                XlRequest("Add", addTuple);
             }
             else if (comType == 1)
             {
@@ -91,12 +138,13 @@ namespace Client
 
             if (comType == 1)
             {
-                view[0].Read(readTuple);
+                readTuple = view[0].Read(readTuple);
+                PrintTuple(readTuple);
             }
             
             else if(comType == 2)
             {
-                Task[] tasks = new Task[view.Count];
+                /*Task[] tasks = new Task[view.Count];
                 int i = 0;
                 foreach (IServerService server in view)
                 {
@@ -104,9 +152,10 @@ namespace Client
                     tasks[i] = t;
                     i++;
                 }
-                Task.WaitAny(tasks);
-            }
-            PrintTuple(readTuple);
+                Task.WaitAny(tasks);*/
+
+                XlRequest("Read", readTuple);
+            }            
         }
 
         private List<string> TransformToTuple(String tuple)

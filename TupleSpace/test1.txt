@@ -2,3 +2,10 @@ begin-repeat 50
 add <"a">
 take <"a">
 end-repeat
+add <"a">
+add <"b">
+begin-repeat 10
+wait 500
+read <"a">
+read <"b">
+end-repeat

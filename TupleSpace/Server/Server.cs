@@ -50,7 +50,7 @@ namespace Server
                         
             ChannelServices.RegisterChannel(channel, true);
 
-            ServerService mo = new ServerService(System.Convert.ToInt32(conf[1]), minDelay, maxDelay, serverLoc);
+            ServerService mo = new ServerService(System.Convert.ToInt32(conf[1]), minDelay, maxDelay, serverLoc, args[6]);
 
             if(serverLoc != null)
             {

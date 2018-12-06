@@ -11,14 +11,20 @@ namespace Server
     class ServerService : MarshalByRefObject, IServerService
     {
         private List<IServerService> view;
-        private List<List<string>> tuples;  
+        private List<List<string>> tuples;
+        private List<Object[]> holdBackQueue;
+        private List<Object[]> deliverQueue;
+        private int p, a;
         private string loc;
         private readonly int comType; //1 for SMR 2 for XL
         private static object _lock = new object();
+
         private object SMRlock = new object();
+        private static object _lock1 = new object();
         private static int frozen_req= 0;
         private static int test= 2;
         private int maxDelay, minDelay;
+        private string id;
         private int currentSeqNum = 0;
         private int servSeqNum = 0;
 
@@ -34,7 +40,7 @@ namespace Server
 
         public enum Estado {LEADER,CANDIDATE,FOLLOWER};
 
-        public ServerService(int comType, int min, int max, string loc)
+        public ServerService(int comType, int min, int max, string loc, string id)
         {            
             view = new List<IServerService>();            
             view.Add(this);
@@ -44,6 +50,14 @@ namespace Server
             minDelay = min;
             this.loc = loc;
             freeze = false;
+            this.id = id;
+
+            if(comType == 2)
+            {
+                holdBackQueue = new List<Object[]>();
+                deliverQueue = new List<Object[]>();
+                p = a = 0;
+            }
         }
 
         //server functions
@@ -80,6 +94,53 @@ namespace Server
         {
             this.freeze = value;
         }
+
+        public int XlRequest(List<string> tuple, string id, string req)
+        {            
+            p = Math.Max(p , a) + 1;
+            AddToHoldQueue(id, p, req, tuple);
+
+            return p;
+        }
+
+        public List<string> XlConfirmation(string id, int nr)
+        {            
+            if(a != nr)
+            {
+                a = Math.Max(nr, a);
+            }
+            CheckChange(id, nr);
+
+            while(true)
+            {
+                if ((bool)holdBackQueue[0][3] && id.Equals((string)holdBackQueue[0][2]))
+                {
+                    deliverQueue.Add(holdBackQueue[0]);
+                    holdBackQueue.Remove(holdBackQueue[0]);
+                    break;
+                }                
+            }
+
+            List<string> result = null;
+            while (!id.Equals((string)deliverQueue[0][2])) ;
+            lock (_lock1) {
+                if (((string)deliverQueue[0][0]).Equals("Add"))
+                {
+                    Add((List<string>)deliverQueue[0][4]);
+                }
+                else if (((string)deliverQueue[0][0]).Equals("Read"))
+                {
+                    result = Read((List<string>)deliverQueue[0][4]);
+                }
+                else if (((string)deliverQueue[0][0]).Equals("Take"))
+                {
+                    result = Take((List<string>)deliverQueue[0][4]);
+                }
+                deliverQueue.Remove(deliverQueue[0]);
+            }            
+            return result;
+        }
+
 
         public void Add(List<string> tuple)
         {
@@ -184,6 +245,7 @@ namespace Server
             
             Console.WriteLine(SeqNum + " FINITO");
         }
+
         public void ReplicateAdd(List<string> tuple,int SeqNum)
         {
             int n = SeqNum;
@@ -195,6 +257,7 @@ namespace Server
                     serv.AddSMR(tuple,n);
                 }
             }           
+
         }
 
         public List<string> Read(List<string> tuple)
@@ -395,11 +458,6 @@ namespace Server
         {
             return view;     
         }
-
-        public void Wait(int x)
-        {
-        
-        }
         //end of client functions
 
         public void Status()
@@ -480,6 +538,81 @@ namespace Server
                 }
                 Console.WriteLine(">");
             }
+        }
+
+        private void AddToHoldQueue(string id, int nr, string req, List<string> tuple)
+        {
+            Object[] queue = new Object[5];
+            //Action a;
+            queue[0] = req;
+            queue[1] = nr;
+            queue[2] = id;
+            queue[3] = false;
+            queue[4] = tuple;
+            /*if(req.Equals("Add"))
+            {
+                a = (() => { this.Add(tuple); });
+                queue[0] = a;
+            }
+            else if(req.Equals("Read"))
+            {
+                a = (() => { this.Read(tuple); });
+                queue[0] = a;
+            }
+            else if(req.Equals("Take"))
+            {
+                a = (() => { this.Take(tuple); });
+                queue[0] = a;
+            }*/
+
+            CheckPosition(nr, queue);
+            
+        }
+
+        private void CheckPosition(int nr, Object[] queue)
+        {
+            int aux = 0;
+            foreach (Object[] obj in holdBackQueue)
+            {
+                if ((int)obj[1] < nr)
+                {
+                    holdBackQueue.Insert(aux, queue);
+                    break;
+                }
+                /*else if((int)obj[1] == nr)
+                {
+                    if(((string)obj[2]). > queue[2]) //compares id for tiebreaker
+                    {
+
+                    }                    
+                }*/
+                aux++;
+            }
+
+            if (aux == holdBackQueue.Count)
+            {
+                holdBackQueue.Add(queue);
+            }
+        }
+
+        private void CheckChange(string id, int nr)
+        {
+            Object[] aux = null;
+            foreach(Object[] obj in holdBackQueue)
+            {
+                if(((string)obj[2]).Equals(id))
+                {
+                    obj[3] = true;
+                    if ((int)obj[1] != nr)
+                    {
+                        aux = obj;                        
+                        holdBackQueue.Remove(obj);
+                    }                    
+                    break;
+                }
+            }
+            if(aux != null)
+                CheckPosition(nr, aux);
         }
     }
 }
