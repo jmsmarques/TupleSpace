@@ -1,1 +1,2 @@
-read <"b">
+add <"b">
+take <"b">

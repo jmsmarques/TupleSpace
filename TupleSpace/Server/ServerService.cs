@@ -15,10 +15,12 @@ namespace Server
         private string loc;
         private readonly int comType; //1 for SMR 2 for XL
         private static object _lock = new object();
+        private object SMRlock = new object();
         private static int frozen_req= 0;
         private static int test= 2;
         private int maxDelay, minDelay;
         private int currentSeqNum = 0;
+        private int servSeqNum = 0;
 
         private Random rnd = new Random();
         public Estado state = Estado.LEADER;
@@ -27,7 +29,7 @@ namespace Server
         private bool freeze;
 
         public string Loc { get { return loc; } }
-        public void IncSeqNum(){ currentSeqNum++;} 
+       
 
 
         public enum Estado {LEADER,CANDIDATE,FOLLOWER};
@@ -80,19 +82,25 @@ namespace Server
         }
 
         public void Add(List<string> tuple)
-        {   
+        {
+           
             Console.WriteLine("[DEBUG] ADD Request");
             Console.WriteLine("[DEBUG] Start Sleep");
             Thread.Sleep(rnd.Next(minDelay, maxDelay));
             Console.WriteLine("[DEBUG] END Sleep");
+            int n;
             
+            
+
 
             while (freeze) ;
             if(comType == 1)
             {
-                Console.WriteLine("[DEBUG] ADD is a SMR");   
+                Console.WriteLine("[DEBUG] ADD is a SMR");
                 //SMR
-                AddSMR(tuple,currentSeqNum + 1);
+                currentSeqNum++;
+                n = currentSeqNum;
+                AddSMR(tuple,n);
             }
             else if(comType==2){
                 //XL
@@ -112,50 +120,79 @@ namespace Server
         }
 
         public void AddSMR(List<string> tuple, int SeqNum) {
-            Console.WriteLine("[DEBUG] AddSMR Request");   
+            Console.WriteLine("[DEBUG]"+SeqNum+" AddSMR "); PrintTuple(tuple); Console.WriteLine(" Requested with SeqNum: " + SeqNum);
+            Console.WriteLine("[DEBUG]" + SeqNum + " Start Sleep");
+            Thread.Sleep(rnd.Next(minDelay, maxDelay));
+            Console.WriteLine("[DEBUG]" + SeqNum + " END Sleep");
             while (true) {
-                Console.WriteLine("[DEBUG] AddSMR While Iteration");   
-                if (currentSeqNum + 1 == SeqNum) {
-                    Console.WriteLine("[DEBUG] AddSMR Correct Sequence Number");   
-                    IncSeqNum();
-                  
+                Console.WriteLine("[DEBUG]" + SeqNum + " AddSMR While Iteration");   
+                if (servSeqNum+1  == SeqNum) {
+                    Console.WriteLine("[DEBUG] " + SeqNum + "AddSMR Correct Sequence Number");
+                   // Console.WriteLine("[DEBUG]currentSeqNum= " + currentSeqNum);
+                   
+                        //currentSeqNum++;
+                    Console.WriteLine("[DEBUG]" + SeqNum + "servSeqNum= " + servSeqNum);
 
-                    if (leader)
-                    {   
-                        Console.WriteLine("[DEBUG] AddSMR is the Leader");   
-                        ReplicateAdd(tuple, currentSeqNum);
-                    }
                     lock (_lock)
                     {
                         tuples.Add(tuple);
+                        //servSeqNum++;
                         //test += 2;
                         //Console.WriteLine(test);
                     }
-                    if (frozen_req > 0)
+
+                    lock (this)
                     {
-                        lock (this) {
-                            Monitor.PulseAll(this);
-                        }
+                        servSeqNum++;
+                        Console.WriteLine("ServSeqNum: "+servSeqNum);
+                        Monitor.PulseAll(this);
                     }
+
+                    if (leader)
+                    {   
+                        Console.WriteLine("[DEBUG]" + SeqNum + " AddSMR is the Leader");   
+                        ReplicateAdd(tuple, SeqNum);
+                    }
+                   
                     break;
                 }
                 else{
-                    lock (this) {
-                        Console.WriteLine("[DEBUG] Wrong Sequence Number: Expected: "+(currentSeqNum+1)+"Obtained: "+SeqNum);   
-                        Monitor.Wait(this);
+                    lock (this)
+                    {
+                        Monitor.PulseAll(this);
                     }
+                    lock (this) {
+                        Console.WriteLine("[DEBUG]" + SeqNum + " Wrong Sequence Number: Expected: " + (servSeqNum+1)+"Obtained: "+SeqNum);
+                        //frozen_req++;
+                        Monitor.Wait(this);
+                          
+
+                    }
+                    //frozen_req--;
+
+                    Console.WriteLine("[DEBUG]" + SeqNum + " RELEASE");
                 }
 
             }
+          //  if (frozen_req > 0)
+           // {
+                lock (this)
+                {
+                    Monitor.PulseAll(this);
+                }
+            //}
+            
+            Console.WriteLine(SeqNum + " FINITO");
         }
         public void ReplicateAdd(List<string> tuple,int SeqNum)
         {
+            int n = SeqNum;
             foreach (ServerService serv in view)
             {
                 if (!serv.leader)
                 {
                     Console.WriteLine("[DEBUG] ReplicateAdd to Follower");   
-                    serv.AddSMR(tuple,SeqNum);
+                    serv.AddSMR(tuple,n);
                 }
             }           
         }
@@ -226,10 +263,12 @@ namespace Server
 
         public List<string> Take(List<string> tuple)
         {
+           
             Console.WriteLine("[DEBUG] Take Requested"); 
             Console.WriteLine("[DEBUG] Start Sleep");
             Thread.Sleep(rnd.Next(minDelay, maxDelay));
             Console.WriteLine("[DEBUG] END Sleep");
+            int n;
             List<string> returnValue = null;
            
             while (freeze) ;
@@ -238,9 +277,12 @@ namespace Server
 
             if (comType == 1)
             {
-                Console.WriteLine("[DEBUG] Take is a SMR");   
+                Console.WriteLine("[DEBUG] Take is a SMR");
                 //SMR
-                return TakeSMR(tuple, currentSeqNum + 1);
+                currentSeqNum++;
+
+                n = currentSeqNum;
+                return TakeSMR(tuple,n);
             }
 
             returnValue = ReadAux(tuple);
@@ -265,55 +307,86 @@ namespace Server
 
         public List<String> TakeSMR(List<string> tuple, int SeqNum)
         {
-            Console.WriteLine("[DEBUG] TakeSMR Requested");  
+            int incFlag = 1;
+            Console.WriteLine("[DEBUG]" + SeqNum + " TakeSMR "); PrintTuple(tuple); Console.WriteLine(" Requested with SeqNum: " + SeqNum);
+            Console.WriteLine("[DEBUG]" + SeqNum + "TAKE  Start Sleep");
+            Thread.Sleep(rnd.Next(minDelay, maxDelay));
+            Console.WriteLine("[DEBUG]" + SeqNum + "TAKE END sleep");
             List<string> returnValue = null;
             while (true)
             {
-                Console.WriteLine("[DEBUG] AddSMR While Iteration"); 
-                if (currentSeqNum + 1 == SeqNum)
+                Console.WriteLine("[DEBUG]" + SeqNum + " TakeSMR While Iteration"); 
+                if (servSeqNum + 1 == SeqNum)
                 {
-                    Console.WriteLine("[DEBUG] TakeSMR SeqNum Expected"); 
-                    IncSeqNum();
+                    Console.WriteLine("[DEBUG]" + SeqNum + " TakeSMR SeqNum Expected");
+                  //  Console.WriteLine("[DEBUG]currentSeqNum= " + currentSeqNum);
 
-                    if (leader)
-                    {
-                        Console.WriteLine("[DEBUG] AddSMR is LEADER"); 
-                        ReplicateTake(tuple);
-                    }
+                  //  currentSeqNum++;
+                   // n = currentSeqNum;
+                    Console.WriteLine("[DEBUG]" + SeqNum + "servSeqNum= " + servSeqNum);
+
                     returnValue = ReadAux(tuple);
                     while (returnValue == null)
                     {
-                        Console.WriteLine("bloqueado");
-                        frozen_req++;
+                        Status();
+                        Console.WriteLine("" + SeqNum + "take bloqueado");
+                        servSeqNum++;
+                        Console.WriteLine("ServSeqNum: " + servSeqNum);
+                        incFlag = 0;
                         lock (this)
                         {
+                            Monitor.PulseAll(this);
+                        }
+                        lock (this)
+                        {
+                            frozen_req++;
                             //IncSeqNum();
                             Monitor.Wait(this);
                         }
-                        returnValue = ReadAux(tuple);
                         frozen_req--;
+                        Console.WriteLine("" + SeqNum + "SAI DO bloqueado");
+                        returnValue = ReadAux(tuple);
+                        
                     }
+                    //lock (this)
+                    //{
+                    //    Monitor.PulseAll(this);
+                    //}
+                    if (leader)
+                    {
+                        Console.WriteLine("[DEBUG]" + SeqNum + " TakeSMR is LEADER"); 
+                        ReplicateTake(tuple,SeqNum);
+                    }
+                    lock (this)
+                    {
+                        Monitor.PulseAll(this);
+                    }
+                    Console.WriteLine(SeqNum + " FINITO");
+                    if (incFlag == 1) { servSeqNum++; Console.WriteLine("ServSeqNum: " + servSeqNum); }
+                   
                     return returnValue;
                 }
                 else
                 {
                     lock (this)
                     {
-                        Console.WriteLine("[DEBUG] Wrong Sequence Number: Expected: "+(currentSeqNum+1)+"Obtained: "+SeqNum);
+                        Console.WriteLine("[DEBUG]" + SeqNum + " Wrong Sequence Number: Expected: " + (servSeqNum+1)+"Obtained: "+SeqNum);
                         Monitor.Wait(this);
                     }
                 }
             }
+            
         }
 
-        public void ReplicateTake(List<string> tuple)
+        public void ReplicateTake(List<string> tuple, int seqNumber)
         {
+            int n = seqNumber;
             foreach (ServerService serv in view)
             {
                 if (!serv.leader)
                 {
                     Console.WriteLine("[DEBUG] Replicate Take to Follower");   
-                    serv.TakeSMR(tuple,currentSeqNum);
+                    serv.TakeSMR(tuple,n);
                 }
             }
         }
