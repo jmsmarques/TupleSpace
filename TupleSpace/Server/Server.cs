@@ -59,7 +59,11 @@ namespace Server
             {
                 mo.Init(serverLoc);
             }
-            mo.SetTimer();
+            if (System.Convert.ToInt32(conf[1]) == 1)
+            {
+                mo.SetTimer();
+            }
+            
             RemotingServices.Marshal(mo,myRemoteObject,
             typeof(ServerService));
 
@@ -67,13 +71,7 @@ namespace Server
            
 
             System.Console.ReadLine();
-            foreach (ServerService serv in mo.GetView())
-            {
-                if (!serv.getID().Equals(mo.getID()))
-                {
-                    serv.removeId(mo.getID());
-                }
-            }
+            mo.Logout();
             
         }
 
