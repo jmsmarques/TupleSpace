@@ -10,11 +10,13 @@ using System.Collections;
 using System.Runtime.Serialization.Formatters;
 using System.IO;
 using System.Threading;
+using System.Timers;
 
 namespace Server
 {
     class Server
     {
+
         static void Main(string[] args)
         {
             string[] conf;
@@ -46,23 +48,33 @@ namespace Server
             provider.TypeFilterLevel = TypeFilterLevel.Full;
             IDictionary props = new Hashtable();
             props["port"] = System.Convert.ToInt32(conf[0]);
+       
             TcpChannel channel = new TcpChannel(props, null, provider);
                         
             ChannelServices.RegisterChannel(channel, true);
 
             ServerService mo = new ServerService(System.Convert.ToInt32(conf[1]), minDelay, maxDelay, serverLoc, args[6]);
-
+            Console.WriteLine(serverLoc);
             if(serverLoc != null)
             {
                 mo.Init(serverLoc);
             }
-
+            mo.SetTimer();
             RemotingServices.Marshal(mo,myRemoteObject,
             typeof(ServerService));
 
-            System.Console.WriteLine("<enter> para sair...");            
+            System.Console.WriteLine("<enter> para sair...");
+           
 
             System.Console.ReadLine();
+            foreach (ServerService serv in mo.GetView())
+            {
+                if (!serv.getID().Equals(mo.getID()))
+                {
+                    serv.removeId(mo.getID());
+                }
+            }
+            
         }
 
         static string[] ReadConfFile()
@@ -130,5 +142,6 @@ namespace Server
                  
             return result;
         }
+
     }
 }

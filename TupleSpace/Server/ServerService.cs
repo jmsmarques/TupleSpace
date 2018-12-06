@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using ClientLibrary;
 
 namespace Server
@@ -27,18 +28,24 @@ namespace Server
         private string id;
         private int currentSeqNum = 0;
         private int servSeqNum = 0;
-
+        public string getID() {
+            return id;
+        }
         private Random rnd = new Random();
-        public Estado state = Estado.LEADER;
+
+        private static System.Timers.Timer electionTimer;
+        private static System.Timers.Timer heartbeatTimer;
+        public static Estado state;
+        private static int term = 1;
+
+        public enum Estado { LEADER, CANDIDATE, FOLLOWER };
+
         public bool leader = true;
 
         private bool freeze;
 
         public string Loc { get { return loc; } }
        
-
-
-        public enum Estado {LEADER,CANDIDATE,FOLLOWER};
 
         public ServerService(int comType, int min, int max, string loc, string id)
         {            
@@ -64,7 +71,6 @@ namespace Server
         public void Init(string serverLoc)
         {
             leader = false;
-            state = Estado.FOLLOWER;
             ServerService obj = (ServerService)Activator.GetObject(
                     typeof(ServerService),
                     serverLoc);
@@ -633,6 +639,100 @@ namespace Server
             }
             if(aux != null)
                 CheckPosition(nr, aux);
+        }
+
+        public void SetTimer()
+        {
+            electionTimer = new System.Timers.Timer(rnd.Next(1000,10000));
+            electionTimer.Elapsed += StartElection;
+            electionTimer.AutoReset = true;
+            electionTimer.Enabled = true;
+
+           
+
+        }
+        private  void StartElection(Object source, ElapsedEventArgs e)
+        {
+            int i = 1;
+            Console.WriteLine("Começou Eleição!");
+          /*  foreach (ServerService serv in view)
+         /*   {
+                
+                Console.WriteLine(serv.getID());
+            }*/
+                state = Estado.CANDIDATE;
+            term++;
+            Console.WriteLine("TERM: " + term);
+            foreach(ServerService serv in view)
+            {
+                Console.WriteLine("kakakakak"+serv.getID());
+                if (!serv.getID().Equals(id))
+                {
+                    Console.WriteLine("COMPARE "+ serv.getID());
+                    i += serv.CompareTerm(term);
+                    Console.WriteLine("---->"+i);
+                }
+            }
+            Console.WriteLine("ANTES: " + i);
+            if( i > view.Count / 2)
+            {
+                Console.WriteLine("Depois");
+                state = Estado.LEADER;
+                Console.WriteLine("Promovido a lider");
+                electionTimer.Stop();
+                heartbeatTimer = new System.Timers.Timer(1000);
+                heartbeatTimer.Elapsed += HeartbeatSend;
+                heartbeatTimer.AutoReset = true;
+                heartbeatTimer.Enabled = true;
+                Console.WriteLine("DONE");
+
+            }
+        }
+
+        private int CompareTerm(int _term)
+        {
+            Console.WriteLine("Alguem anda aqui a cheirar");
+            if (_term> term)
+            {
+                term = _term;
+                electionTimer.Stop();
+                electionTimer.Start();
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        private void HeartbeatSend(Object source, ElapsedEventArgs e)
+        {
+            Console.WriteLine("HBSend");
+            foreach (ServerService serv in view)
+            {
+                if (!serv.getID().Equals( id))
+                {
+                    Console.WriteLine("HeartBeat Sent");
+                    serv.Heartbeat();
+                }
+            }
+        }
+        public void Heartbeat()
+        {
+            Console.WriteLine("Ping");
+            electionTimer.Stop();
+            electionTimer.Start();
+        } 
+
+        public void removeId(string id)
+        {
+            foreach(ServerService serv in view)
+            {
+                if (serv.getID().Equals(id)){
+                    Console.WriteLine(serv.getID());
+                    view.Remove(serv);
+                }
+            }
         }
     }
 }
