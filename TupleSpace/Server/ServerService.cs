@@ -69,16 +69,19 @@ namespace Server
                     typeof(ServerService),
                     serverLoc);
 
-            obj.GetServerView(this);
+            obj.GetServerInfo(this);
 
         }
 
-        public void GetServerView(ServerService newServer)
+        public void GetServerInfo(ServerService newServer)
         {
             view.Add(newServer);
             foreach (ServerService serv in view)
             {
                 serv.setServerView(view);
+                Console.WriteLine("servReq: " + servSeqNum + ", currentSeq: " + currentSeqNum);
+                Status();
+                serv.setInfo(servSeqNum, currentSeqNum, tuples);
                 Console.WriteLine("View sent");
             }
         }
@@ -86,6 +89,13 @@ namespace Server
         {
             view = newView;
             Console.WriteLine(view.Count);
+        }
+
+        public void setInfo(int serverReq, int currentReq, List<List<string>> tupleSpace)
+        {
+            servSeqNum = serverReq;
+            currentSeqNum = currentReq;
+            tuples = tupleSpace;
         }
         //end of server functions
 
@@ -345,7 +355,9 @@ namespace Server
                 currentSeqNum++;
 
                 n = currentSeqNum;
-                return TakeSMR(tuple,n);
+                returnValue = TakeSMR(tuple,n);
+                return returnValue;
+
             }
 
             returnValue = ReadAux(tuple);
@@ -391,7 +403,7 @@ namespace Server
                     returnValue = ReadAux(tuple);
                     while (returnValue == null)
                     {
-                        Status();
+                        //Status();
                         Console.WriteLine("" + SeqNum + "take bloqueado");
                         servSeqNum++;
                         Console.WriteLine("ServSeqNum: " + servSeqNum);
@@ -426,7 +438,15 @@ namespace Server
                     }
                     Console.WriteLine(SeqNum + " FINITO");
                     if (incFlag == 1) { servSeqNum++; Console.WriteLine("ServSeqNum: " + servSeqNum); }
-                   
+                    //Status();
+                    lock (_lock)
+                    {
+
+                        tuples.Remove(returnValue);
+                        Console.WriteLine("------------------------");
+                        Status();
+                        Console.WriteLine("------------------------");
+                    }
                     return returnValue;
                 }
                 else
