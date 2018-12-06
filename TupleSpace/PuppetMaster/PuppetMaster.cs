@@ -56,9 +56,15 @@ namespace PuppetMaster
                     //System.Console.WriteLine(line);
                     string[] words = line.Split(' ');
                     ReadCommand(pcs, words);
+                    Console.ReadLine();
                 }
+                Console.WriteLine("File Reading Finished");
             }
             catch (FileNotFoundException)
+            {
+                Console.WriteLine("File doesn't exists");
+            }
+            catch(DirectoryNotFoundException)
             {
                 Console.WriteLine("File doesn't exists");
             }
@@ -73,32 +79,36 @@ namespace PuppetMaster
             switch (words[0])
             {
                 case "Server":
-                    Console.WriteLine("...");
+                    Console.WriteLine("Starting Server...");
                     Task.Run(() => pcs.StartServer(words[1], words[2],
                         System.Convert.ToInt32(words[3]), System.Convert.ToInt32(words[4])));
                     break;
                 case "Client":
-                    Console.WriteLine("...");
+                    Console.WriteLine("Starting Client...");
                     Task.Run(() => pcs.StartClient(words[1], words[2], words[3]));
                     break;
                 case "Status":
-                    Console.WriteLine("...");
+                    Console.WriteLine("Printing Status...");
                     Task.Run(() => pcs.PrintStatus());
                     break;
                 case "Wait":
+                    Console.WriteLine("Waiting...");
                     Thread.Sleep(System.Convert.ToInt32(words[1]));
                     break;
                 case "Crash":
+                    Console.WriteLine("Crash Process...");
                     Task.Run(() => pcs.Crash(words[1]));
                     break;
                 case "Freeze":
+                    Console.WriteLine("Freezing Process...");
                     Task.Run(() => pcs.Freeze(words[1]));
                     break;
                 case "Unfreeze":
+                    Console.WriteLine("Unfreezing Process...");
                     Task.Run(() => pcs.Unfreeze(words[1]));
                     break;   
                 default:
-                    ExecFile(pcs, words[0]);
+                    ExecFile(pcs, "../../../" + words[0]);
                     break;
             }
         }

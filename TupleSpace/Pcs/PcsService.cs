@@ -72,7 +72,7 @@ namespace PuppetMaster
 
             try
             {
-                if(StartProcess(serverID, startInfo, url))
+                if(StartProcess(serverID, startInfo, null))
                     return "Id already in use";
             }
             catch
@@ -183,17 +183,20 @@ namespace PuppetMaster
             {
                 Console.WriteLine("{0} Comecou", serverId);
                 Console.WriteLine(exeProcess.Id);
-                IServerService obj;
-                
-                try
+                IServerService obj = null;
+
+                if (url != null)
                 {
-                    obj = (IServerService)Activator.GetObject(
-                        typeof(IServerService),
-                        url);
-                }
-                catch
-                {
-                    obj = null;
+                    try
+                    {
+                        obj = (IServerService)Activator.GetObject(
+                            typeof(IServerService),
+                            url);
+                    }
+                    catch
+                    {
+                        obj = null;
+                    }
                 }
                 //obj.Status();
                 Object[] aux = new Object[3] { serverId, System.Convert.ToString(exeProcess.Id), obj };

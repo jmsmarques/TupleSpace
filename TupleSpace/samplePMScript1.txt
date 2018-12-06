@@ -4,4 +4,3 @@ Client c1 tcp://localhost:60001/C ../../../sampleClientScript1.txt
 Status
 Wait 5000
 Status
-
