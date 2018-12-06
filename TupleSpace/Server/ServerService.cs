@@ -78,20 +78,21 @@ namespace Server
             view.Add(newServer);
             foreach (ServerService serv in view)
             {
-                serv.setServerView(view);
+                serv.SetServerView(view);
                 Console.WriteLine("servReq: " + servSeqNum + ", currentSeq: " + currentSeqNum);
                 Status();
-                serv.setInfo(servSeqNum, currentSeqNum, tuples);
+                serv.SetInfo(servSeqNum, currentSeqNum, tuples);
                 Console.WriteLine("View sent");
             }
         }
-        public void setServerView(List<IServerService> newView)
+
+        public void SetServerView(List<IServerService> newView)
         {
             view = newView;
             Console.WriteLine(view.Count);
         }
 
-        public void setInfo(int serverReq, int currentReq, List<List<string>> tupleSpace)
+        public void SetInfo(int serverReq, int currentReq, List<List<string>> tupleSpace)
         {
             servSeqNum = serverReq;
             currentSeqNum = currentReq;
@@ -150,7 +151,6 @@ namespace Server
             }            
             return result;
         }
-
 
         public void Add(List<string> tuple)
         {
@@ -290,6 +290,7 @@ namespace Server
            
             return returnValue;
         }
+
         public List<string> ReadAux(List<string> tuple)
         {
             lock (_lock)
@@ -568,22 +569,7 @@ namespace Server
             queue[1] = nr;
             queue[2] = id;
             queue[3] = false;
-            queue[4] = tuple;
-            /*if(req.Equals("Add"))
-            {
-                a = (() => { this.Add(tuple); });
-                queue[0] = a;
-            }
-            else if(req.Equals("Read"))
-            {
-                a = (() => { this.Read(tuple); });
-                queue[0] = a;
-            }
-            else if(req.Equals("Take"))
-            {
-                a = (() => { this.Take(tuple); });
-                queue[0] = a;
-            }*/
+            queue[4] = tuple;            
 
             CheckPosition(nr, queue);
             
@@ -599,13 +585,14 @@ namespace Server
                     holdBackQueue.Insert(aux, queue);
                     break;
                 }
-                /*else if((int)obj[1] == nr)
+                else if((int)obj[1] == nr)
                 {
-                    if(((string)obj[2]). > queue[2]) //compares id for tiebreaker
-                    {
-
+                    if(String.CompareOrdinal((string)obj[2], (string)queue[2]) > 0) //compares id for tiebreaker
+                    {                    
+                        holdBackQueue.Insert(aux, queue);
+                        break;
                     }                    
-                }*/
+                }
                 aux++;
             }
 
@@ -633,6 +620,6 @@ namespace Server
             }
             if(aux != null)
                 CheckPosition(nr, aux);
-        }
+        }        
     }
 }

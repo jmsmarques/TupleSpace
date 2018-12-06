@@ -30,7 +30,7 @@ namespace Client
             {
                 Task t = Task.Run(() =>  answers[i] = s.XlRequest(tuple, id, req));
                 tasks[i] = t;
-                if(i < view.Count - 1)
+                if(i < view.Count - 1) //protection because of tasks
                     i++;
             }
 
