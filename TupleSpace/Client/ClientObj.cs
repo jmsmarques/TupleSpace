@@ -28,20 +28,15 @@ namespace Client
             int i = 0;
             foreach (IServerService s in view)
             {
-                Task t = Task.Run(() =>  answers[i] = s.XlRequest(tuple, id, req));
-                tasks[i] = t;
-                if(i < view.Count - 1) //protection because of tasks
-                    i++;
+                Task t = Task.Run(() => {
+                    int n = i;
+                    answers[n] = s.XlRequest(tuple, id, req); });
+                tasks[i] = t;          
             }
 
             Task.WaitAll(tasks);
 
-            int max = 0;
-            for (int n = 0; n < answers.Length; n++)
-            {
-                if (answers[n] > max)
-                    max = answers[n];
-            }
+            int max = answers.Max();
 
             i = 0;
             List<string> result = null;
@@ -110,15 +105,7 @@ namespace Client
             }
             else if (comType == 2)
             {
-                Task[] tasks = new Task[view.Count];
-                int i = 0;
-                foreach (IServerService server in view)
-                {
-                    Task t = Task.Run(() => takeTuple = server.Take(takeTuple));
-                    tasks[i] = t;
-                    i++;
-                }
-                Task.WaitAll(tasks);
+                XlRequest("Take", takeTuple);
             }
             
 
@@ -143,17 +130,7 @@ namespace Client
             }
             
             else if(comType == 2)
-            {
-                /*Task[] tasks = new Task[view.Count];
-                int i = 0;
-                foreach (IServerService server in view)
-                {
-                    Task t = Task.Run(() => readTuple = server.Read(readTuple));
-                    tasks[i] = t;
-                    i++;
-                }
-                Task.WaitAny(tasks);*/
-
+            {                
                 XlRequest("Read", readTuple);
             }            
         }

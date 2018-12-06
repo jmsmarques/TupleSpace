@@ -92,7 +92,7 @@ namespace PuppetMaster
                     Task.Run(() => pcs.PrintStatus());
                     break;
                 case "Wait":
-                    Console.WriteLine("Waiting...");
+                    Console.WriteLine("Waiting {0}...", System.Convert.ToInt32(words[1]) / 1000);
                     Thread.Sleep(System.Convert.ToInt32(words[1]));
                     break;
                 case "Crash":

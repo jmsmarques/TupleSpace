@@ -485,7 +485,6 @@ namespace Server
 
         public List<IServerService> GetView()
         {
-            Console.WriteLine("FDS PUTA QUE PARIU");
             foreach(ServerService serv in view)
             {
                 Console.WriteLine(serv.getID());
@@ -737,24 +736,15 @@ namespace Server
             electionTimer.Start();
         } 
 
-        public void removeId(string id)
+        public void RemoveId(ServerService server)
         {
-            foreach(ServerService serv in view)
-            {
-                if (serv.getID().Equals(id)){
-                    Console.WriteLine("VAIS SER APAGADO CRLHES" + serv.getID());
-                    view.Remove(serv);
-                }
-                Console.WriteLine("FICASTE CRLH "+serv.getID());
-            }
+            view.Remove(server);
         }
 
         public void Logout()
-        {
-            foreach(ServerService serv in view)
-            {
-                serv.removeId(this.id);
-            }
+        {            
+            for(int i = 0; i < view.Count; i++)
+                ((ServerService)view[i]).RemoveId(this);
         }
     }
 }
