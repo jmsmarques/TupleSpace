@@ -85,17 +85,17 @@ namespace PuppetMaster
         }
 
         public void PrintStatus()
-        {
-            foreach(Object[] obj in processes) //erro de concurrencia
+        {        
+            for(int i = 0; i < processes.Count; i++)
             {
                 try
                 {
-                    if (obj[2] != null)
-                        ((IServerService)obj[2]).Status();
+                    if (processes[i][2] != null)
+                        ((IServerService)processes[i][2]).Status();
                 }
                 catch
                 {
-                    processes.Remove(obj);
+                    processes.Remove(processes[i]);
                 }
             }
         } 
@@ -204,6 +204,7 @@ namespace PuppetMaster
                              
                 exeProcess.WaitForExit();
                 Console.WriteLine("{0} Terminou ", serverId);
+                processes.Remove(aux);
             }
             return false;
         }
