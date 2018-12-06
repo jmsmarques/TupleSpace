@@ -71,7 +71,7 @@ namespace Server
            
 
             System.Console.ReadLine();
-            mo.Logout();
+            //mo.Logout();
             
         }
 
