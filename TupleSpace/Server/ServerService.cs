@@ -117,7 +117,10 @@ namespace Server
         public int XlRequest(List<string> tuple, string id, string req)
         {            
             p = Math.Max(p , a) + 1;
-            AddToHoldQueue(id, p, req, tuple);
+            lock (_lock1)
+            {
+                AddToHoldQueue(id, p, req, tuple);
+            }
 
             return p;
         }
@@ -128,11 +131,16 @@ namespace Server
             {
                 a = Math.Max(nr, a);
             }
-            CheckChange(id, nr);
+            
 
             while(true)
-            {
-                if ((bool)holdBackQueue[0][3] && id.Equals((string)holdBackQueue[0][2]))
+            {         
+                lock(_lock1)
+                {
+                    CheckChange(id, nr);
+                }
+                    
+                if ((bool)holdBackQueue[0][3] && nr == ((int)holdBackQueue[0][1]))
                 {
                     deliverQueue.Add(holdBackQueue[0]);
                     holdBackQueue.Remove(holdBackQueue[0]);
@@ -141,22 +149,29 @@ namespace Server
             }
 
             List<string> result = null;
-            while (!id.Equals((string)deliverQueue[0][2])) ;
-            lock (_lock1) {
-                if (((string)deliverQueue[0][0]).Equals("Add"))
-                {
-                    Add((List<string>)deliverQueue[0][4]);
-                }
-                else if (((string)deliverQueue[0][0]).Equals("Read"))
-                {
-                    result = Read((List<string>)deliverQueue[0][4]);
-                }
-                else if (((string)deliverQueue[0][0]).Equals("Take"))
-                {
-                    result = Take((List<string>)deliverQueue[0][4]);
-                }
+            while (!id.Equals((string)deliverQueue[0][2])  || nr != ((int)deliverQueue[0][1])) ;
+            List<string> aux;
+     
+            if (((string)deliverQueue[0][0]).Equals("Add"))
+            {
+                aux = (List<string>)deliverQueue[0][4];
                 deliverQueue.Remove(deliverQueue[0]);
-            }            
+                Add(aux);
+            }
+            else if (((string)deliverQueue[0][0]).Equals("Read"))
+            {
+                aux = (List<string>)deliverQueue[0][4];
+                deliverQueue.Remove(deliverQueue[0]);
+                result = Read(aux);
+            }
+            else if (((string)deliverQueue[0][0]).Equals("Take"))
+            {
+                aux = (List<string>)deliverQueue[0][4];
+                deliverQueue.Remove(deliverQueue[0]);
+                result = Take(aux);
+            }
+                
+                       
             return result;
         }
 
@@ -183,12 +198,14 @@ namespace Server
             }
             else if(comType==2){
                 //XL
+                Console.WriteLine("[DEBUG] ADD is a XL");
                 lock (_lock)
                     {
                         tuples.Add(tuple);
                         //test += 2;
                         //Console.WriteLine(test);
                 }
+                Console.WriteLine(frozen_req);
                 if (frozen_req > 0)
                 {
                     lock (this){
@@ -485,10 +502,6 @@ namespace Server
 
         public List<IServerService> GetView()
         {
-            foreach(ServerService serv in view)
-            {
-                Console.WriteLine(serv.getID());
-            }
             return view;     
         }
         //end of client functions
@@ -589,8 +602,8 @@ namespace Server
 
         private void CheckPosition(int nr, Object[] queue)
         {
-            int aux = 0;
-            foreach (Object[] obj in holdBackQueue)
+            //int aux = 0;
+            /*foreach (Object[] obj in holdBackQueue)
             {
                 if ((int)obj[1] < nr)
                 {
@@ -606,9 +619,27 @@ namespace Server
                     }                    
                 }
                 aux++;
+            }*/
+            int i = 0;
+            for(i = 0; i < holdBackQueue.Count; i++)
+            {
+                if ((int)holdBackQueue[i][1] < nr)
+                {
+                    holdBackQueue.Insert(i, queue);
+                    break;
+                }
+                else if ((int)holdBackQueue[i][1] == nr)
+                {
+                    if (String.CompareOrdinal((string)holdBackQueue[0][2], (string)queue[2]) > 0) //compares id for tiebreaker
+                    {
+                        holdBackQueue.Insert(i, queue);
+                        break;
+                    }
+                }
+                //aux++;
             }
 
-            if (aux == holdBackQueue.Count)
+            if (i == holdBackQueue.Count)
             {
                 holdBackQueue.Add(queue);
             }
@@ -617,7 +648,7 @@ namespace Server
         private void CheckChange(string id, int nr)
         {
             Object[] aux = null;
-            foreach(Object[] obj in holdBackQueue)
+            /*foreach(Object[] obj in holdBackQueue)
             {
                 if(((string)obj[2]).Equals(id))
                 {
@@ -627,6 +658,19 @@ namespace Server
                         aux = obj;                        
                         holdBackQueue.Remove(obj);
                     }                    
+                    break;
+                }
+            }*/
+            for(int i = 0; i < holdBackQueue.Count; i++)
+            {
+                if (((string)holdBackQueue[i][2]).Equals(id))
+                {
+                    holdBackQueue[i][3] = true;
+                    if ((int)holdBackQueue[i][1] != nr)
+                    {
+                        aux = holdBackQueue[i];
+                        holdBackQueue.Remove(holdBackQueue[i]);
+                    }
                     break;
                 }
             }

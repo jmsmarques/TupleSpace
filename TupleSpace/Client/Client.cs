@@ -57,7 +57,7 @@ namespace Client
             ClientObj client = new ClientObj(obj.GetView(), comType, args[3]);
            
             Console.WriteLine("Client\n");
-            Console.WriteLine("args len" + args.Length);
+            
             if (args.Length < 3)
                 Exec(client);
             else
