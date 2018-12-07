@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Server.cs" />
     <Compile Include="ServerService.cs" />
+    <Compile Include="XlObj.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

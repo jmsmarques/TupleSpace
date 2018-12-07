@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,8 +17,8 @@ namespace Server
         private static int i = 1;
         private static List<IServerService> view;
         private List<List<string>> tuples;
-        private List<Object[]> holdBackQueue;
-        private List<Object[]> deliverQueue;
+        private ArrayList holdBackQueue;
+        private Queue deliverQueue;
         private int p, a;
         private string loc;
         private readonly int comType; //1 for SMR 2 for XL
@@ -71,8 +72,8 @@ namespace Server
 
             if(comType == 2)
             {
-                holdBackQueue = new List<Object[]>();
-                deliverQueue = new List<Object[]>();
+                holdBackQueue = ArrayList.Synchronized(new ArrayList());
+                deliverQueue = Queue.Synchronized(new Queue());
                 p = a = 0;
             }
         }
@@ -129,7 +130,9 @@ namespace Server
         }
 
         public int XlRequest(List<string> tuple, string id, string req)
-        {            
+        {
+            while (freeze) ;
+
             p = Math.Max(p , a) + 1;
             lock (_lock1)
             {
@@ -145,47 +148,44 @@ namespace Server
             {
                 a = Math.Max(nr, a);
             }
-            
 
-            while(true)
-            {         
-                lock(_lock1)
+            CheckChange(id, nr);
+
+            while (true)
+            {                                            
+                if (((XlObj)holdBackQueue[0]).Agreed && nr == ((XlObj)holdBackQueue[0]).Nr)
                 {
-                    CheckChange(id, nr);
-                }
-                    
-                if ((bool)holdBackQueue[0][3] && nr == ((int)holdBackQueue[0][1]))
-                {
-                    deliverQueue.Add(holdBackQueue[0]);
+                    deliverQueue.Enqueue(holdBackQueue[0]);
                     holdBackQueue.Remove(holdBackQueue[0]);
                     break;
                 }                
             }
 
             List<string> result = null;
-            while (!id.Equals((string)deliverQueue[0][2])  || nr != ((int)deliverQueue[0][1])) ;
-            List<string> aux;
-     
-            if (((string)deliverQueue[0][0]).Equals("Add"))
+            XlObj aux1 = (XlObj)deliverQueue.Peek();
+            while (!id.Equals(aux1.Id)  || nr != aux1.Nr)
             {
-                aux = (List<string>)deliverQueue[0][4];
-                deliverQueue.Remove(deliverQueue[0]);
+                aux1 = (XlObj)deliverQueue.Peek();
+            }
+
+            List<string> aux;
+
+            if ((((XlObj)deliverQueue.Peek()).Req).Equals("Add"))
+            {
+                aux = ((XlObj)deliverQueue.Dequeue()).Tuple;
                 Add(aux);
             }
-            else if (((string)deliverQueue[0][0]).Equals("Read"))
+            else if ((((XlObj)deliverQueue.Peek()).Req).Equals("Read"))
             {
-                aux = (List<string>)deliverQueue[0][4];
-                deliverQueue.Remove(deliverQueue[0]);
+                aux = ((XlObj)deliverQueue.Dequeue()).Tuple;
                 result = Read(aux);
             }
-            else if (((string)deliverQueue[0][0]).Equals("Take"))
+            else if ((((XlObj)deliverQueue.Peek()).Req).Equals("Take"))
             {
-                aux = (List<string>)deliverQueue[0][4];
-                deliverQueue.Remove(deliverQueue[0]);
+                aux = ((XlObj)deliverQueue.Dequeue()).Tuple;
                 result = Take(aux);
             }
-                
-                       
+                                       
             return result;
         }
 
@@ -197,10 +197,7 @@ namespace Server
             Thread.Sleep(rnd.Next(minDelay, maxDelay));
             Console.WriteLine("[DEBUG] END Sleep");
             int n;
-            
-            
-
-
+                       
             while (freeze) ;
             if(comType == 1)
             {
@@ -602,38 +599,39 @@ namespace Server
 
         private void AddToHoldQueue(string id, int nr, string req, List<string> tuple)
         {
-            Object[] queue = new Object[5];
+            /*Object[] queue = new Object[5];
             //Action a;
             queue[0] = req;
             queue[1] = nr;
             queue[2] = id;
             queue[3] = false;
-            queue[4] = tuple;            
+            queue[4] = tuple;   */
+            XlObj queue = new XlObj(req, nr, id, false, tuple);
 
-            CheckPosition(nr, queue);
-            
+            CheckPosition(nr, queue);            
         }
 
-        private void CheckPosition(int nr, Object[] queue)
+        private void CheckPosition(int nr, XlObj queue)
         {
-            //int aux = 0;
-            /*foreach (Object[] obj in holdBackQueue)
+            int aux = 0;
+            
+            foreach (XlObj obj in holdBackQueue)
             {
-                if ((int)obj[1] < nr)
+                if (obj.Nr < nr)
                 {
                     holdBackQueue.Insert(aux, queue);
                     break;
                 }
-                else if((int)obj[1] == nr)
+                else if(obj.Nr == nr)
                 {
-                    if(String.CompareOrdinal((string)obj[2], (string)queue[2]) > 0) //compares id for tiebreaker
+                    if(String.CompareOrdinal(obj.Id, queue.Id) > 0) //compares id for tiebreaker
                     {                    
                         holdBackQueue.Insert(aux, queue);
                         break;
                     }                    
                 }
                 aux++;
-            }*/
+            }/*
             int i = 0;
             for(i = 0; i < holdBackQueue.Count; i++)
             {
@@ -651,9 +649,9 @@ namespace Server
                     }
                 }
                 //aux++;
-            }
+            }*/
 
-            if (i == holdBackQueue.Count)
+            if (aux == holdBackQueue.Count)
             {
                 holdBackQueue.Add(queue);
             }
@@ -661,20 +659,21 @@ namespace Server
 
         private void CheckChange(string id, int nr)
         {
-            Object[] aux = null;
-            /*foreach(Object[] obj in holdBackQueue)
+            XlObj aux = null;
+            foreach(XlObj obj in holdBackQueue)
             {
-                if(((string)obj[2]).Equals(id))
+                if(obj.Id.Equals(id))
                 {
-                    obj[3] = true;
-                    if ((int)obj[1] != nr)
+                    obj.Agreed = true;
+                    if (obj.Nr != nr)
                     {
                         aux = obj;                        
                         holdBackQueue.Remove(obj);
                     }                    
                     break;
                 }
-            }*/
+            }
+            /*
             for(int i = 0; i < holdBackQueue.Count; i++)
             {
                 if (((string)holdBackQueue[i][2]).Equals(id))
@@ -687,7 +686,7 @@ namespace Server
                     }
                     break;
                 }
-            }
+            }*/
             if(aux != null)
                 CheckPosition(nr, aux);
 
@@ -698,12 +697,7 @@ namespace Server
             electionTimer = new System.Timers.Timer(rnd.Next(5000,10000));
             electionTimer.Elapsed += StartElection;
             electionTimer.AutoReset = true;
-            electionTimer.Enabled = true;
-           
-
-
-
-
+            electionTimer.Enabled = true;          
         }
         public void SetReqTimer()
         {
@@ -712,9 +706,6 @@ namespace Server
             requestTimer.Elapsed += CancelRequest;
             requestTimer.AutoReset = true;
             requestTimer.Enabled = true;
-
-
-
         }
         private void CancelRequest(Object source, ElapsedEventArgs e)
         {
@@ -829,8 +820,6 @@ namespace Server
             Console.WriteLine("ANTES: " + i+ "needed" + view.Count/2);
            
         }
-
- 
         public void CompareTerm(int _term,ServerService server)
         {
             
@@ -924,8 +913,7 @@ namespace Server
                 if (!((ServerService)view[i]).Equals(this))
                 {
                     ((ServerService)view[i]).RemoveId(this);
-                }
-                
+                }                
         }
     }
 }
