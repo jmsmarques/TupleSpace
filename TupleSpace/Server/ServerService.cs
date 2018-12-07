@@ -11,6 +11,7 @@ namespace Server
 {
     class ServerService : MarshalByRefObject, IServerService
     {
+        private int i = 1;
         private static List<IServerService> view;
         private List<List<string>> tuples;
         private List<Object[]> holdBackQueue;
@@ -22,6 +23,7 @@ namespace Server
 
         private object SMRlock = new object();
         private static object _lock1 = new object();
+       
         private static int frozen_req= 0;
         private static int test= 2;
         private int maxDelay, minDelay;
@@ -96,6 +98,12 @@ namespace Server
 
         public void SetServerView(List<IServerService> newView)
         {
+            Console.WriteLine("-----------------");
+            foreach(ServerService serv in newView)
+            {
+                Console.WriteLine(serv.getID());
+            }
+            Console.WriteLine("-----------------");
             view = newView;
             Console.WriteLine(view.Count);
         }
@@ -691,31 +699,62 @@ namespace Server
         }
         private  void StartElection(Object source, ElapsedEventArgs e)
         {
-            int i = 1;
+             i = 1;
             Console.WriteLine("Começou Eleição!");
           /*  foreach (ServerService serv in view)
          /*   {
                 
                 Console.WriteLine(serv.getID());
             }*/
-                state = Estado.CANDIDATE;
+            state = Estado.CANDIDATE;
             term++;
             Console.WriteLine("TERM: " + term);
             Console.WriteLine("ServerView n:" + view.Count);
-            Task[] tasks = new Task[view.Count-1];
+            Task[] tasks = new Task[view.Count];
             int j = 0;
+            foreach ( ServerService server in view)
+            {
+                Console.WriteLine("oooioi");
+            }
             foreach (ServerService server in view)
             {
-                Console.WriteLine("myid:" + id + "servID:" + server.getID());
-                if (!server.getID().Equals(id))
+                if (server != this)
                 {
-                    Console.WriteLine("aqui");
-                    Task t = Task.Run(() => i += server.CompareTerm(term));
+                     Console.WriteLine("aqui");
+                    Task t = Task.Run(() => server.CompareTerm(term,this));
                     tasks[j] = t;
                     j++;
-                }             
+
+                    Console.WriteLine("enviou para servidor " + server.getID());
+                    //server.CompareTerm(term, id);
+                    Console.WriteLine("i= " + i);
+                    lock (_lock1)
+                    {
+                        Monitor.Wait(_lock1);
+                    }
+                   
+                    if (i > (view.Count / 2))
+                    {
+
+                        // if (state == Estado.CANDIDATE)
+                        //{
+                        Console.WriteLine("Depois");
+                        state = Estado.LEADER;
+                        Console.WriteLine("Promovido a lider");
+                        electionTimer.Stop();
+                        heartbeatTimer = new System.Timers.Timer(1000);
+                        heartbeatTimer.Elapsed += HeartbeatSend;
+                        heartbeatTimer.AutoReset = true;
+                        heartbeatTimer.Enabled = true;
+                        Console.WriteLine("DONE");
+                        return;
+                        //  }
+
+                    }
+                }
+               // Task.WaitAll(tasks);
             }
-            Task.WaitAll(tasks, 1000);
+           //Task.WaitAll(tasks, 1000);
            // foreach (ServerService serv in view)
            // {
            //     Console.WriteLine("kakakakak"+serv.getID());
@@ -727,37 +766,41 @@ namespace Server
            //     }
            // }
             Console.WriteLine("ANTES: " + i+ "needed" + view.Count/2);
-            if (i > view.Count / 2)
-            {
-                if (state == Estado.CANDIDATE) { 
-                    Console.WriteLine("Depois");
-                    state = Estado.LEADER;
-                    Console.WriteLine("Promovido a lider");
-                    electionTimer.Stop();
-                    heartbeatTimer = new System.Timers.Timer(1000);
-                    heartbeatTimer.Elapsed += HeartbeatSend;
-                    heartbeatTimer.AutoReset = true;
-                    heartbeatTimer.Enabled = true;
-                    Console.WriteLine("DONE");
-                }
-
-            }
+           
         }
 
-        private int CompareTerm(int _term)
+        public void CompareTerm(int _term,ServerService server)
         {
-            Console.WriteLine("COmpara o recebido :" + _term + "com o meu:" + term);
+            
+            Console.WriteLine("COmpara o recebido de servidor "+server.getID()+" :" + _term + "com o meu:" + term);
             if (_term> term)
             {
+                Console.WriteLine("e maior chefe");
                 term = _term;
+                server.CompareANS();
                 electionTimer.Stop();
                 electionTimer.Start();
-                return 1;
+
+               
+                return;
             }
             else
             {
-                return 0;
+                Console.WriteLine("Nao e maior chefe");
+                return  ;
             }
+        }
+        public void CompareANS()
+        {
+            //INCREMENTA O i LOCAL
+            Console.WriteLine("TOMAAAA PUTA! i= "+i);
+            i++;
+            Console.WriteLine("i== " + i);
+            lock (_lock1)
+            {
+                Monitor.PulseAll(_lock1);
+            }
+
         }
 
         private void HeartbeatSend(Object source, ElapsedEventArgs e)
