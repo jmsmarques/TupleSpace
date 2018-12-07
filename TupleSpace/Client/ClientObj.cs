@@ -56,6 +56,10 @@ namespace Client
                 Task.WaitAny(tasks);
                 PrintTuple(result);
             }
+            else
+            {
+                Task.WaitAll(tasks);
+            }
             
         } 
 

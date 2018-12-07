@@ -1,0 +1,4 @@
+Server s1 tcp://localhost:50001/S 0 0
+Wait 1000
+Client c1 tcp://localhost ../../../sampleClientScript2-1.txt
+Client c2 tcp://localhost ../../../sampleClientScript2-2.txt
