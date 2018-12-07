@@ -48,7 +48,9 @@ namespace Server
             provider.TypeFilterLevel = TypeFilterLevel.Full;
             IDictionary props = new Hashtable();
             props["port"] = System.Convert.ToInt32(conf[0]);
-       
+            props["timeout"] =100;
+            props["connectionTimeout"] = 100;
+
             TcpChannel channel = new TcpChannel(props, null, provider);
                         
             ChannelServices.RegisterChannel(channel, true);
@@ -71,7 +73,7 @@ namespace Server
            
 
             System.Console.ReadLine();
-            //mo.Logout();
+            mo.Logout();
             
         }
 
